@@ -68,7 +68,6 @@ class FirecrawlService {
   }
 
   generateSimulatedLiveResults(query, city) {
-    // Generates realistic freshly scraped results for any search query
     const samplePriceBase = query.toLowerCase().includes('iphone') ? 1450000 : 
                             query.toLowerCase().includes('macbook') ? 2950000 : 
                             query.toLowerCase().includes('solar') ? 1850000 : 550000;

@@ -1,4 +1,4 @@
-// Crawler Compare - Main Application Logic
+// Crawler Compare - Main Application Logic (Product Hunt Style)
 
 document.addEventListener('DOMContentLoaded', () => {
   // DOM Elements
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let activeBadgeFilter = 'all';
 
-  // Render Products Function
+  // Render Products Function (Product Hunt Row Layout)
   function renderProducts() {
     const filters = {
       search: searchInput.value,
@@ -38,10 +38,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (products.length === 0) {
       productsGrid.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-muted);">
-          <div style="font-size: 48px; margin-bottom: 12px;">🔎</div>
-          <h3 style="font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 8px;">No Listings Found</h3>
-          <p>Try clearing your search filters or click <strong>Firecrawl Live Search</strong> to pull web deals in real-time.</p>
+        <div style="text-align: center; padding: 48px 20px; background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+          <h3 style="font-size: 16px; font-weight: 700; color: var(--text-dark); margin-bottom: 6px;">No Listings Found</h3>
+          <p style="font-size: 13px; color: var(--text-muted);">Try adjusting your search query or click <strong>Firecrawl Live Search</strong> to pull live market data.</p>
         </div>
       `;
       return;
@@ -52,79 +51,77 @@ document.addEventListener('DOMContentLoaded', () => {
         name: 'Verified Vendor',
         handle: '@vendor',
         badge: 'blue',
-        badgeTitle: '🔵 ID Verified Vendor',
+        badgeTitle: 'ID Verified',
         rating: 4.5
       };
 
       const isUpvoted = !!window.db.userUpvotes[product.id];
       const meritRankScore = window.db.calculateMeritRank(seller, product);
 
-      // Format Currency in NGN ₦
+      // Format Currency in NGN
       const formattedPrice = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(product.price);
 
-      // Badge HTML styling
+      // Badge HTML styling (Clean, Product Hunt style pills, no emojis)
       let badgeHtml = '';
       if (seller.badge === 'gold') {
-        badgeHtml = `<span class="card-badge-tag" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid #fbbf24;">🏆 Gold Merit Vendor</span>`;
+        badgeHtml = `<span class="trust-badge-tag gold">Gold Merit</span>`;
       } else if (seller.badge === 'blue') {
-        badgeHtml = `<span class="card-badge-tag" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8;">🔵 ID Verified</span>`;
+        badgeHtml = `<span class="trust-badge-tag blue">ID Verified</span>`;
       } else if (seller.badge === 'store') {
-        badgeHtml = `<span class="card-badge-tag" style="background: rgba(52, 211, 153, 0.2); color: #34d399; border: 1px solid #34d399;">🏢 Official Retailer</span>`;
+        badgeHtml = `<span class="trust-badge-tag store">Official Store</span>`;
       }
 
       // WhatsApp Pre-filled link
-      const waText = encodeURIComponent(`Hi ${seller.name}, I saw your listing for "${product.title}" on Crawler Compare (₦${product.price.toLocaleString()}). Is it available in ${product.location}?`);
+      const waText = encodeURIComponent(`Hi ${seller.name}, I saw your listing for "${product.title}" on Crawler Compare (${formattedPrice}). Is it available in ${product.location}?`);
       const waUrl = `https://wa.me/${seller.whatsapp || '2348000000000'}?text=${waText}`;
 
       const card = document.createElement('article');
       card.className = 'product-card';
       card.innerHTML = `
+        <!-- Left Product Hunt Upvote Box -->
+        <button class="upvote-box ${isUpvoted ? 'upvoted' : ''}" data-id="${product.id}">
+          <span class="arrow">▲</span>
+          <span class="count">${product.upvotes}</span>
+        </button>
+
+        <!-- Thumbnail Image -->
         <div class="card-img-wrap">
           <img src="${product.image}" alt="${product.title}" loading="lazy">
-          ${badgeHtml}
-          ${product.isSponsored ? '<span class="card-ad-tag">AD / SPONSORED</span>' : ''}
         </div>
 
-        <div class="card-body">
-          <div class="seller-info-row">
-            <span class="seller-name">
-              ${seller.name}
-              <span style="font-size: 11px; opacity: 0.7;">(⭐ ${seller.rating})</span>
-            </span>
-            <span class="location-tag">📍 ${product.location}</span>
+        <!-- Main Product Details -->
+        <div class="card-main-content">
+          <div class="card-title-row">
+            <a href="#" class="product-title">${product.title}</a>
+            ${badgeHtml}
+            ${product.isSponsored ? '<span style="font-size: 10px; font-weight: 700; padding: 2px 6px; background: #fee2e2; color: #dc2626; border-radius: 4px;">AD</span>' : ''}
           </div>
 
-          <h3 class="product-title">${product.title}</h3>
-
-          <div class="price-row">
-            <span class="price-amount">${formattedPrice}</span>
-            <span class="price-condition">${product.condition}</span>
+          <div class="card-meta-row">
+            <span class="meta-price">${formattedPrice}</span>
+            <span>•</span>
+            <span class="meta-seller">${seller.name} (${seller.rating} rating)</span>
+            <span>•</span>
+            <span class="meta-location">${product.location}</span>
           </div>
 
           ${product.specs ? `
             <div class="specs-list">
               ${product.specs.map(s => `<span class="spec-chip">${s}</span>`).join('')}
+              <span class="spec-chip" style="background: #fffbebfb; color: #b45309; font-weight: 600;">Merit Score: ${meritRankScore}</span>
             </div>
           ` : ''}
+        </div>
 
-          <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 14px;">
-            Merit Rank Score: <strong style="color: var(--accent-gold);">${meritRankScore} pts</strong> • Source: ${product.source}
-          </div>
-
-          <div class="card-actions">
-            <button class="upvote-btn ${isUpvoted ? 'upvoted' : ''}" data-id="${product.id}">
-              <span class="upvote-arrow">▲</span>
-              <span class="upvote-count">${product.upvotes}</span>
-            </button>
-
-            <a href="${waUrl}" target="_blank" rel="noopener" class="btn-whatsapp">
-              💬 WhatsApp Seller
-            </a>
-
-            <button class="btn-reviews" data-seller="${seller.id}">
-              ⭐ Reviews
-            </button>
-          </div>
+        <!-- Right Side Actions -->
+        <div class="card-right-actions">
+          <button class="btn-reviews" data-seller="${seller.id}">
+            Reviews (${window.db.getReviews(seller.id).length})
+          </button>
+          
+          <a href="${waUrl}" target="_blank" rel="noopener" class="btn-whatsapp">
+            Contact Seller
+          </a>
         </div>
       `;
 
@@ -137,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Card Interactive Listeners
   function attachCardEventListeners() {
     // Upvote Button Handler
-    document.querySelectorAll('.upvote-btn').forEach(btn => {
+    document.querySelectorAll('.upvote-box').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const id = btn.getAttribute('data-id');
         window.db.toggleUpvote(id);
@@ -161,58 +158,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!seller) return;
 
+    let badgePillHtml = seller.badge === 'gold' ? '<span class="trust-badge-tag gold">Gold Merit Vendor</span>' :
+                        seller.badge === 'blue' ? '<span class="trust-badge-tag blue">ID Verified</span>' :
+                        '<span class="trust-badge-tag store">Official Store</span>';
+
     reviewsModalContent.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
-        <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent-gold)); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 20px;">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+        <div style="width: 44px; height: 44px; border-radius: 50%; background: #0f172a; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px;">
           ${seller.name[0]}
         </div>
         <div>
-          <h3 style="font-size: 18px; font-weight: 800; color: #fff;">${seller.name}</h3>
-          <p style="font-size: 13px; color: var(--text-muted);">${seller.badgeTitle} • 📍 ${seller.location}</p>
+          <h3 style="font-size: 16px; font-weight: 700; color: var(--text-dark);">${seller.name}</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">${seller.location} • ${badgePillHtml}</p>
         </div>
       </div>
 
-      <div style="display: flex; gap: 16px; margin-bottom: 20px; background: rgba(255,255,255,0.03); padding: 12px 16px; border-radius: 10px;">
-        <div><strong>⭐ Rating:</strong> ${seller.rating} / 5.0</div>
-        <div><strong>🏆 Upvotes:</strong> ${seller.upvotes}</div>
-        <div><strong>✅ Deals Done:</strong> ${seller.salesCount}</div>
+      <div style="display: flex; gap: 16px; margin-bottom: 16px; background: #f8fafc; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px;">
+        <div><strong>Rating:</strong> ${seller.rating} / 5.0</div>
+        <div><strong>Upvotes:</strong> ${seller.upvotes}</div>
+        <div><strong>Completed Deals:</strong> ${seller.salesCount}</div>
       </div>
 
       <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.4;">${seller.bio}</p>
 
-      <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 12px; color: #fff;">Community Reviews (${reviews.length})</h4>
+      <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 10px; color: var(--text-dark);">Community Reviews (${reviews.length})</h4>
 
-      <div style="max-height: 250px; overflow-y: auto; margin-bottom: 20px;">
-        ${reviews.length === 0 ? '<p style="color: var(--text-dim); font-size: 13px;">No community reviews yet. Be the first to review this seller!</p>' : ''}
+      <div style="max-height: 220px; overflow-y: auto; margin-bottom: 20px;">
+        ${reviews.length === 0 ? '<p style="color: var(--text-muted); font-size: 13px;">No community reviews yet. Be the first to review this seller.</p>' : ''}
         ${reviews.map(r => `
           <div class="review-item">
             <div class="review-header">
-              <span class="review-author">${r.author} ${r.verifiedBuyer ? '<span style="color: var(--accent-store); font-size: 11px;">✔ Verified Buyer</span>' : ''}</span>
-              <span class="review-stars">⭐ ${r.rating} / 5</span>
+              <span class="review-author">${r.author} ${r.verifiedBuyer ? '<span style="color: #059669; font-size: 11px; font-weight: 600; margin-left: 4px;">Verified Buyer</span>' : ''}</span>
+              <span class="review-stars">${r.rating} / 5 Rating</span>
             </div>
             <p class="review-text">"${r.comment}"</p>
-            <div style="font-size: 11px; color: var(--text-dim); margin-top: 6px;">${r.date}</div>
+            <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">${r.date}</div>
           </div>
         `).join('')}
       </div>
 
       <!-- Add Review Form -->
-      <form id="addReviewForm" style="border-top: 1px solid var(--border-color); padding-top: 16px;">
-        <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 10px; color: #fff;">Leave a Review for ${seller.name}</h4>
+      <form id="addReviewForm" style="border-top: 1px solid var(--border-color); padding-top: 14px;">
+        <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 10px; color: var(--text-dark);">Write a Review for ${seller.name}</h4>
         
-        <div class="form-group" style="display: flex; gap: 10px;">
-          <input type="text" class="form-control" id="revAuthor" placeholder="Your Name (e.g. Tunde from Abuja)" required>
-          <select class="form-control" id="revRating" style="width: 120px;" required>
-            <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
-            <option value="4">⭐⭐⭐⭐ (4/5)</option>
-            <option value="3">⭐⭐⭐ (3/5)</option>
-            <option value="2">⭐⭐ (2/5)</option>
-            <option value="1">⭐ (1/5)</option>
+        <div class="form-group" style="display: flex; gap: 8px;">
+          <input type="text" class="form-control" id="revAuthor" placeholder="Your Name" required>
+          <select class="form-control" id="revRating" style="width: 130px;" required>
+            <option value="5">5 / 5 Rating</option>
+            <option value="4">4 / 5 Rating</option>
+            <option value="3">3 / 5 Rating</option>
+            <option value="2">2 / 5 Rating</option>
+            <option value="1">1 / 5 Rating</option>
           </select>
         </div>
 
         <div class="form-group">
-          <textarea class="form-control" id="revComment" rows="2" placeholder="Share your experience (e.g., product condition, delivery speed)..." required></textarea>
+          <textarea class="form-control" id="revComment" rows="2" placeholder="Describe your experience with this seller..." required></textarea>
         </div>
 
         <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Verified Review</button>
@@ -273,7 +274,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const sellerName = document.getElementById('formSellerName').value;
     const whatsapp = document.getElementById('formWhatsApp').value;
 
-    // Create or find vendor
     const newSellerId = 'sel-' + Date.now();
     window.db.data.sellers.push({
       id: newSellerId,
@@ -285,13 +285,13 @@ document.addEventListener('DOMContentLoaded', () => {
       whatsapp: whatsapp,
       instagram: `https://instagram.com/${sellerName.replace('@', '')}`,
       badge: 'blue',
-      badgeTitle: '🔵 ID Verified Vendor',
+      badgeTitle: 'ID Verified Vendor',
       upvotes: 1,
       rating: 5.0,
       salesCount: 1,
       joinedYear: '2026',
       isVerified: true,
-      bio: `Verified local vendor based in ${location}.`
+      bio: `Verified vendor located in ${location}.`
     });
 
     window.db.addProduct({
@@ -332,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
         triggerScrapeBtn.disabled = false;
         triggerScrapeBtn.style.opacity = '1';
         renderProducts();
-      }, 1200);
+      }, 1000);
     } catch (err) {
       console.error(err);
       liveScrapeBanner.style.display = 'none';

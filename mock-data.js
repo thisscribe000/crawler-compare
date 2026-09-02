@@ -1,8 +1,8 @@
-// Crawler Compare - Nigerian Initial Dataset & Mock Storage Engine
+// Crawler Compare - Nigerian Dataset & Storage Engine (Clean Minimalist Theme)
 
 const INITIAL_DATA = {
   cities: [
-    { id: 'all', name: 'All Nigeria 🇳🇬' },
+    { id: 'all', name: 'All Nigeria' },
     { id: 'abuja', name: 'Abuja (FCT)' },
     { id: 'lagos', name: 'Lagos State' },
     { id: 'ph', name: 'Port Harcourt' },
@@ -20,7 +20,7 @@ const INITIAL_DATA = {
     { id: 'all', name: 'All Products' },
     { id: 'phones', name: 'Smartphones & Tablets' },
     { id: 'laptops', name: 'Laptops & Computers' },
-    { id: 'power', name: 'Generators & Inverters/Solar' },
+    { id: 'power', name: 'Generators & Solar Inverters' },
     { id: 'gaming', name: 'Gaming Consoles & Gear' },
     { id: 'appliances', name: 'Home Appliances' }
   ],
@@ -35,7 +35,7 @@ const INITIAL_DATA = {
       whatsapp: '2348039876543',
       instagram: 'https://instagram.com/abujagadgethub',
       badge: 'gold', // gold: Elite Merit, blue: ID Verified, store: Official Store
-      badgeTitle: '🏆 Elite Merit Vendor',
+      badgeTitle: 'Gold Merit Vendor',
       upvotes: 184,
       rating: 4.9,
       salesCount: 142,
@@ -53,7 +53,7 @@ const INITIAL_DATA = {
       whatsapp: '2348123456789',
       instagram: 'https://instagram.com/ikejatechmaster',
       badge: 'gold',
-      badgeTitle: '🏆 Elite Merit Vendor',
+      badgeTitle: 'Gold Merit Vendor',
       upvotes: 231,
       rating: 4.85,
       salesCount: 310,
@@ -71,7 +71,7 @@ const INITIAL_DATA = {
       whatsapp: '2348000007568',
       instagram: 'https://instagram.com/slot_ng',
       badge: 'store',
-      badgeTitle: '🏢 Official Retailer',
+      badgeTitle: 'Official Retailer',
       upvotes: 95,
       rating: 4.5,
       salesCount: 1500,
@@ -89,7 +89,7 @@ const INITIAL_DATA = {
       whatsapp: '2348067891234',
       instagram: 'https://instagram.com/solarpower_ph',
       badge: 'blue',
-      badgeTitle: '🔵 ID Verified Vendor',
+      badgeTitle: 'ID Verified Vendor',
       upvotes: 67,
       rating: 4.7,
       salesCount: 45,
@@ -107,7 +107,7 @@ const INITIAL_DATA = {
       whatsapp: '2348155554321',
       instagram: 'https://instagram.com/kanogenempire',
       badge: 'blue',
-      badgeTitle: '🔵 ID Verified Vendor',
+      badgeTitle: 'ID Verified Vendor',
       upvotes: 42,
       rating: 4.6,
       salesCount: 29,
@@ -227,7 +227,7 @@ const INITIAL_DATA = {
       author: 'Chidi O. (Abuja)',
       rating: 5,
       date: '2 days ago',
-      comment: 'Bought the iPhone 15 Pro Max from their Wuse 2 shop. Smooth deal, tested the IMEI on Apple site right there. Super genuine seller!',
+      comment: 'Bought the iPhone 15 Pro Max from their Wuse 2 shop. Smooth deal, tested the IMEI on Apple site right there. Super genuine seller.',
       upvotes: 14,
       verifiedBuyer: true
     },
@@ -323,10 +323,9 @@ class DataStore {
 
   calculateMeritRank(seller, product) {
     if (!seller) return 0;
-    // Merit Rank Formula: (Product Upvotes * 2) + (Seller Upvotes * 1.5) + (Rating * 10) + (Sales * 3)
     let score = (product.upvotes * 2) + (seller.upvotes * 1.5) + (seller.rating * 10) + (seller.salesCount * 3);
-    if (seller.badge === 'gold') score += 100; // Gold Merit Boost
-    return score;
+    if (seller.badge === 'gold') score += 100;
+    return Math.round(score);
   }
 
   toggleUpvote(productId) {
@@ -341,7 +340,6 @@ class DataStore {
     } else {
       product.upvotes += 1;
       this.userUpvotes[productId] = true;
-      // Also credit seller
       const seller = this.getSeller(product.sellerId);
       if (seller) seller.upvotes += 1;
     }
@@ -354,7 +352,7 @@ class DataStore {
     const newRev = {
       id: 'rev-' + Date.now(),
       sellerId,
-      author: author || 'Anonymous Buyer',
+      author: author || 'Verified Buyer',
       rating: parseFloat(rating),
       date: 'Just now',
       comment,
@@ -363,13 +361,12 @@ class DataStore {
     };
     this.data.reviews.unshift(newRev);
 
-    // Update seller rating average
     const seller = this.getSeller(sellerId);
     if (seller) {
       const sellerRevs = this.getReviews(sellerId);
       const avg = sellerRevs.reduce((acc, r) => acc + r.rating, 0) / sellerRevs.length;
       seller.rating = parseFloat(avg.toFixed(1));
-      seller.salesCount += 1; // Increment deal count
+      seller.salesCount += 1;
     }
 
     this.save();
