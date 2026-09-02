@@ -1,4 +1,4 @@
-// Crawler Compare - Main Application Logic (Responsive & Grouped Comparison)
+// Crawler Compare - Production Engine with Authentic Registration & Inventory Management
 
 document.addEventListener('DOMContentLoaded', () => {
   // DOM Elements
@@ -18,9 +18,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const authModal = document.getElementById('authModal');
   const openAuthModalBtn = document.getElementById('openAuthModalBtn');
   const closeAuthModal = document.getElementById('closeAuthModal');
-  const demoSellerLoginBtn = document.getElementById('demoSellerLoginBtn');
-  const demoAdminLoginBtn = document.getElementById('demoAdminLoginBtn');
-  const continueBuyerBtn = document.getElementById('continueBuyerBtn');
+
+  // Auth Tab Elements
+  const tabSignInBtn = document.getElementById('tabSignInBtn');
+  const tabSignUpBtn = document.getElementById('tabSignUpBtn');
+  const signInForm = document.getElementById('signInForm');
+  const signUpForm = document.getElementById('signUpForm');
+
+  const demoVendorBtn = document.getElementById('demoVendorBtn');
+  const demoAdminBtn = document.getElementById('demoAdminBtn');
+  const regRole = document.getElementById('regRole');
+  const vendorFields = document.getElementById('vendorFields');
 
   const addModal = document.getElementById('addModal');
   const openAddProductBtn = document.getElementById('openAddProductBtn');
@@ -31,27 +39,29 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeReviewsModal = document.getElementById('closeReviewsModal');
   const reviewsModalContent = document.getElementById('reviewsModalContent');
 
-  // Active Session State (null = Public Buyer, 'seller' = Vendor, 'admin' = Admin)
-  let currentUser = JSON.parse(localStorage.getItem('crawler_compare_user')) || null;
+  // Load any live scraped data on boot
+  loadScrapedDataFile();
 
-  // View Controller based on Session State
+  // Active View Controller
   function renderActiveView() {
-    if (!currentUser) {
-      // 1. PUBLIC BUYER MODE (Default)
+    const activeUser = window.db.getActiveUser();
+
+    if (!activeUser) {
+      // 1. PUBLIC CONSUMER SEARCH ENGINE
       buyerView.style.display = 'block';
       sellerView.style.display = 'none';
       adminView.style.display = 'none';
 
       authNavContainer.innerHTML = `
         <button class="btn btn-outline" id="openAuthModalBtn">
-          Vendor / Admin Login
+          Sign In / Register
         </button>
       `;
       document.getElementById('openAuthModalBtn').addEventListener('click', () => authModal.classList.add('active'));
       renderGroupedProducts();
 
-    } else if (currentUser.role === 'seller') {
-      // 2. PRIVATE SELLER DASHBOARD
+    } else if (activeUser.role === 'seller') {
+      // 2. PRIVATE SELLER PORTAL
       buyerView.style.display = 'none';
       sellerView.style.display = 'block';
       adminView.style.display = 'none';
@@ -59,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
       authNavContainer.innerHTML = `
         <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
           <span style="font-size: 11px; font-weight: 700; color: var(--text-dark); background: #f1f5f9; padding: 5px 10px; border-radius: 14px;">
-            Vendor: ${currentUser.name}
+            Vendor: ${activeUser.name}
           </span>
           <button class="btn btn-outline" id="logoutBtn" style="padding: 5px 10px; font-size: 11px;">Log Out</button>
         </div>
@@ -67,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('logoutBtn').addEventListener('click', handleLogout);
       renderSellerDashboard();
 
-    } else if (currentUser.role === 'admin') {
+    } else if (activeUser.role === 'admin') {
       // 3. PRIVATE ADMIN CONSOLE
       buyerView.style.display = 'none';
       sellerView.style.display = 'none';
@@ -87,31 +97,124 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function handleLogout() {
-    currentUser = null;
-    localStorage.removeItem('crawler_compare_user');
+    window.db.logoutUser();
     renderActiveView();
   }
 
-  // Auth Modal Handlers
+  // Load Scraped JSON if available
+  async function loadScrapedDataFile() {
+    try {
+      const res = await fetch('scraped-data.json');
+      if (res.ok) {
+        const scraped = await res.json();
+        if (Array.isArray(scraped) && scraped.length > 0) {
+          scraped.forEach(item => {
+            window.db.addInventoryOffer({
+              title: item.title,
+              category: item.category,
+              price: item.price,
+              condition: 'Verified Scraped Offer',
+              city: item.city,
+              location: item.location,
+              outlink: item.sourceUrl
+            });
+          });
+          renderGroupedProducts();
+        }
+      }
+    } catch (e) {
+      // no-op if file not requested
+    }
+  }
+
+  // Auth Tab Switcher
+  tabSignInBtn.addEventListener('click', () => {
+    tabSignInBtn.classList.add('active');
+    tabSignUpBtn.classList.remove('active');
+    signInForm.style.display = 'block';
+    signUpForm.style.display = 'none';
+  });
+
+  tabSignUpBtn.addEventListener('click', () => {
+    tabSignUpBtn.classList.add('active');
+    tabSignInBtn.classList.remove('active');
+    signInForm.style.display = 'none';
+    signUpForm.style.display = 'block';
+  });
+
+  // Toggle Vendor Specific Fields on Role Change
+  regRole.addEventListener('change', () => {
+    if (regRole.value === 'seller') {
+      vendorFields.style.display = 'block';
+    } else {
+      vendorFields.style.display = 'none';
+    }
+  });
+
+  // Authentic Sign In Submit Handler
+  signInForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+
+    try {
+      window.db.loginUser(email, password);
+      authModal.classList.remove('active');
+      signInForm.reset();
+      renderActiveView();
+    } catch (err) {
+      alert(err.message);
+    }
+  });
+
+  // Authentic Registration Submit Handler
+  signUpForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const role = document.getElementById('regRole').value;
+    const name = document.getElementById('regName').value;
+    const email = document.getElementById('regEmail').value;
+    const password = document.getElementById('regPassword').value;
+    const shopName = document.getElementById('regShopName').value;
+    const city = document.getElementById('regCity').value;
+    const whatsapp = document.getElementById('regWhatsapp').value;
+    const location = document.getElementById('regLocation').value;
+
+    try {
+      window.db.registerUser({
+        email,
+        password,
+        role,
+        name,
+        shopName,
+        city,
+        location,
+        whatsapp
+      });
+      authModal.classList.remove('active');
+      signUpForm.reset();
+      renderActiveView();
+    } catch (err) {
+      alert(err.message);
+    }
+  });
+
+  // Quick Demo Buttons
+  demoVendorBtn.addEventListener('click', () => {
+    window.db.loginUser('abujagadget@gmail.com', 'password123');
+    authModal.classList.remove('active');
+    renderActiveView();
+  });
+
+  demoAdminBtn.addEventListener('click', () => {
+    window.db.loginUser('admin@crawlercompare.ng', 'adminpassword');
+    authModal.classList.remove('active');
+    renderActiveView();
+  });
+
   openAuthModalBtn.addEventListener('click', () => authModal.classList.add('active'));
   closeAuthModal.addEventListener('click', () => authModal.classList.remove('active'));
-  continueBuyerBtn.addEventListener('click', () => authModal.classList.remove('active'));
 
-  demoSellerLoginBtn.addEventListener('click', () => {
-    currentUser = { role: 'seller', sellerId: 'sel-1', name: 'AbujaGadgetHub' };
-    localStorage.setItem('crawler_compare_user', JSON.stringify(currentUser));
-    authModal.classList.remove('active');
-    renderActiveView();
-  });
-
-  demoAdminLoginBtn.addEventListener('click', () => {
-    currentUser = { role: 'admin', name: 'System Admin' };
-    localStorage.setItem('crawler_compare_user', JSON.stringify(currentUser));
-    authModal.classList.remove('active');
-    renderActiveView();
-  });
-
-  // Render Grouped Products (Public Buyer Mode)
+  // Render Grouped Products
   function renderGroupedProducts() {
     const filters = {
       search: searchInput.value,
@@ -234,7 +337,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Render Private Seller Dashboard
   function renderSellerDashboard() {
-    const sellerId = currentUser ? currentUser.sellerId : 'sel-1';
+    const activeUser = window.db.getActiveUser();
+    const sellerId = activeUser ? activeUser.sellerId : 'sel-1';
     const seller = window.db.getSeller(sellerId) || window.db.getSeller('sel-1');
     if (!seller) return;
 
@@ -260,14 +364,14 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${log.timestamp}</td>
         <td><strong>iPhone 15 Pro Max (256GB)</strong></td>
         <td>📍 ${log.city.toUpperCase()}</td>
-        <td><code>Instagram Store Out-Link</code></td>
+        <td><code>Direct Store Out-Link</code></td>
         <td><span style="color: #059669; font-weight: 700;">Tracked Click</span></td>
       `;
       logsTable.appendChild(tr);
     });
   }
 
-  // Render Private Admin Console
+  // Render Admin Console
   function renderAdminConsole() {
     const adminQueueTable = document.getElementById('adminQueueTableBody');
     adminQueueTable.innerHTML = '';
@@ -368,7 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Seller Offer Addition Form
+  // Real Inventory Posting Form Submit Handler
   if (openAddProductBtn) {
     openAddProductBtn.addEventListener('click', () => addModal.classList.add('active'));
   }
@@ -378,33 +482,28 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     const title = document.getElementById('formTitle').value;
     const price = parseFloat(document.getElementById('formPrice').value);
+    const category = document.getElementById('formCategory').value;
     const city = document.getElementById('formCity').value;
+    const condition = document.getElementById('formCondition').value;
     const location = document.getElementById('formLocation').value;
     const outlink = document.getElementById('formOutlink').value;
 
-    const sellerId = currentUser ? currentUser.sellerId : 'sel-1';
-
-    if (window.db.data.productGroups.length > 0) {
-      window.db.data.productGroups[0].offers.unshift({
-        id: 'offer-' + Date.now(),
-        sellerId: sellerId,
-        price: price,
-        condition: title + ' (New Offer)',
-        city: city,
-        location: location,
-        source: 'Vendor Direct Entry',
-        outlink: outlink,
-        clicks: 0
-      });
-      window.db.save();
-    }
+    window.db.addInventoryOffer({
+      title,
+      category,
+      price,
+      condition,
+      city,
+      location,
+      outlink
+    });
 
     addProductForm.reset();
     addModal.classList.remove('active');
     renderActiveView();
   });
 
-  // Filter Listeners
+  // Filter Event Listeners
   searchInput.addEventListener('input', renderGroupedProducts);
   citySelect.addEventListener('change', renderGroupedProducts);
   categorySelect.addEventListener('change', renderGroupedProducts);

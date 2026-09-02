@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Crawler Compare - Price Aggregator & Vendor Trust Platform</title>
+  <title>Crawler Compare - Price Aggregator & Vendor Platform</title>
   <meta name="description" content="Compare product prices across Abuja, Lagos, Port Harcourt & Kano. Find verified sellers with community upvotes & merit rank badges.">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -15,7 +15,7 @@
       <div class="logo-icon">C</div>
       <div class="logo-text">
         <h1>Crawler Compare</h1>
-        <p>Price Aggregator & Vendor Trust</p>
+        <p>Price Aggregator & Vendor Platform</p>
       </div>
     </div>
 
@@ -28,7 +28,7 @@
       <!-- Auth State Button (Dynamic) -->
       <div id="authNavContainer">
         <button class="btn btn-outline" id="openAuthModalBtn">
-          Vendor / Admin Login
+          Sign In / Register
         </button>
       </div>
     </div>
@@ -79,11 +79,11 @@
       </section>
     </section>
 
-    <!-- ==================== 2. PRIVATE SELLER DASHBOARD VIEW (Requires Seller Login) ==================== -->
+    <!-- ==================== 2. PRIVATE SELLER DASHBOARD VIEW ==================== -->
     <section id="sellerView" style="display: none;">
       <div class="dashboard-header">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 10px;">
-          <h2>Vendor Analytics & Inventory Dashboard</h2>
+          <h2>Vendor Analytics & Inventory Portal</h2>
           <button class="btn btn-primary" id="openAddProductBtn">+ List New Inventory</button>
         </div>
         <p>Private seller portal for <strong id="sellerAccountName">AbujaGadgetHub</strong>. Track outbound buyer clicks and manage listings.</p>
@@ -135,7 +135,7 @@
       </div>
     </section>
 
-    <!-- ==================== 3. PRIVATE ADMIN CONSOLE VIEW (Requires Admin Login) ==================== -->
+    <!-- ==================== 3. PRIVATE ADMIN CONSOLE VIEW ==================== -->
     <section id="adminView" style="display: none;">
       <div class="dashboard-header">
         <h2>System Admin Console</h2>
@@ -165,48 +165,130 @@
 
   </main>
 
-  <!-- Login / Auth Modal -->
+  <!-- Real User & Vendor Authentication / Registration Modal -->
   <div class="modal-overlay" id="authModal">
     <div class="modal-box">
       <button class="modal-close" id="closeAuthModal">&times;</button>
-      <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 6px; color: var(--text-dark);">Sign In to Account</h3>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Access your private Seller Analytics Dashboard or Admin Console.</p>
-
-      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
-        <button class="btn btn-outline" id="demoSellerLoginBtn" style="justify-content: center; padding: 12px;">
-          🔑 Demo Sign In as Vendor (@AbujaGadgetHub)
-        </button>
-        <button class="btn btn-outline" id="demoAdminLoginBtn" style="justify-content: center; padding: 12px;">
-          🛡️ Demo Sign In as System Admin
-        </button>
+      
+      <!-- Modal Tabs: Sign In / Register -->
+      <div style="display: flex; gap: 10px; border-bottom: 1px solid var(--border-color); margin-bottom: 16px; padding-bottom: 8px;">
+        <button class="auth-tab active" id="tabSignInBtn">Sign In</button>
+        <button class="auth-tab" id="tabSignUpBtn">Create Account / Register Vendor</button>
       </div>
 
-      <div style="border-top: 1px solid var(--border-color); padding-top: 16px; text-align: center;">
-        <button class="btn btn-outline" id="continueBuyerBtn" style="width: 100%;">
-          Continue Browsing as Public Buyer
+      <!-- 1. Sign In Form -->
+      <form id="signInForm">
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" class="form-control" id="loginEmail" placeholder="abujagadget@gmail.com" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" class="form-control" id="loginPassword" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px; padding: 12px;">
+          Sign In
         </button>
-      </div>
+
+        <div style="margin-top: 16px; text-align: center; border-top: 1px solid var(--border-color); padding-top: 12px;">
+          <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Quick Demo Accounts:</p>
+          <div style="display: flex; gap: 8px; justify-content: center;">
+            <button type="button" class="btn btn-outline" id="demoVendorBtn" style="padding: 4px 10px; font-size: 11px;">Vendor Login</button>
+            <button type="button" class="btn btn-outline" id="demoAdminBtn" style="padding: 4px 10px; font-size: 11px;">Admin Login</button>
+          </div>
+        </div>
+      </form>
+
+      <!-- 2. Registration Form -->
+      <form id="signUpForm" style="display: none;">
+        <div class="form-group">
+          <label>I want to register as:</label>
+          <select class="form-control" id="regRole" required>
+            <option value="buyer">Shopper / Buyer</option>
+            <option value="seller">Vendor / Seller (List Shop & Products)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Full Name / Owner</label>
+          <input type="text" class="form-control" id="regName" placeholder="Tunde Bakare" required>
+        </div>
+
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" class="form-control" id="regEmail" placeholder="tunde@mygadgetshop.com" required>
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" class="form-control" id="regPassword" placeholder="••••••••" required>
+        </div>
+
+        <!-- Vendor Specific Fields -->
+        <div id="vendorFields" style="display: none; border-top: 1px dashed var(--border-color); padding-top: 12px; margin-top: 12px;">
+          <div class="form-group">
+            <label>Shop / Business Name</label>
+            <input type="text" class="form-control" id="regShopName" placeholder="Abuja Gadget Hub">
+          </div>
+          <div class="form-group" style="display: flex; gap: 8px;">
+            <div style="flex: 1;">
+              <label>City</label>
+              <select class="form-control" id="regCity">
+                <option value="abuja">Abuja (FCT)</option>
+                <option value="lagos">Lagos State</option>
+                <option value="ph">Port Harcourt</option>
+                <option value="kano">Kano</option>
+              </select>
+            </div>
+            <div style="flex: 1;">
+              <label>WhatsApp Number</label>
+              <input type="text" class="form-control" id="regWhatsapp" placeholder="2348012345678">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Physical Address / Market Location</label>
+            <input type="text" class="form-control" id="regLocation" placeholder="Suite B12, Banex Plaza, Wuse 2">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px; padding: 12px;">
+          Complete Registration
+        </button>
+      </form>
+
     </div>
   </div>
 
-  <!-- Vendor Inventory Addition Modal -->
+  <!-- Real Vendor Inventory Posting Modal -->
   <div class="modal-overlay" id="addModal">
     <div class="modal-box">
       <button class="modal-close" id="closeAddModal">&times;</button>
-      <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 4px; color: var(--text-dark);">Add Product Offer</h3>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">List a new product offer to track out-links and receive buyer inquiries.</p>
+      <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 4px; color: var(--text-dark);">Post Product Offer</h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">List a real product offer to track out-links and receive buyer WhatsApp inquiries.</p>
       
       <form id="addProductForm">
         <div class="form-group">
-          <label>Product Title</label>
-          <input type="text" class="form-control" id="formTitle" placeholder="e.g. Samsung S24 Ultra 512GB" required>
+          <label>Product Title / Model</label>
+          <input type="text" class="form-control" id="formTitle" placeholder="e.g. iPhone 15 Pro Max (256GB)" required>
         </div>
 
         <div class="form-group" style="display: flex; gap: 10px;">
           <div style="flex: 1;">
-            <label>Price (NGN)</label>
-            <input type="number" class="form-control" id="formPrice" placeholder="1500000" required>
+            <label>Price (NGN ₦)</label>
+            <input type="number" class="form-control" id="formPrice" placeholder="1580000" required>
           </div>
+          <div style="flex: 1;">
+            <label>Category</label>
+            <select class="form-control" id="formCategory">
+              <option value="phones">Phones & Tablets</option>
+              <option value="laptops">Laptops & Computers</option>
+              <option value="power">Generators & Solar</option>
+              <option value="gaming">Gaming Consoles</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="display: flex; gap: 10px;">
           <div style="flex: 1;">
             <label>City</label>
             <select class="form-control" id="formCity">
@@ -216,6 +298,10 @@
               <option value="kano">Kano</option>
             </select>
           </div>
+          <div style="flex: 1;">
+            <label>Condition</label>
+            <input type="text" class="form-control" id="formCondition" placeholder="e.g. Brand New (Sealed)" required>
+          </div>
         </div>
 
         <div class="form-group">
@@ -224,12 +310,12 @@
         </div>
 
         <div class="form-group">
-          <label>Outbound Link / Store URL</label>
+          <label>Outbound Store Link / Social URL</label>
           <input type="url" class="form-control" id="formOutlink" placeholder="https://instagram.com/yourhandle or website URL" required>
         </div>
 
         <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px; padding: 12px;">
-          Publish Inventory Offer
+          Publish Real Offer
         </button>
       </form>
     </div>

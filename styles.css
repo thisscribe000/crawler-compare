@@ -1,4 +1,4 @@
-/* Crawler Compare - Fully Responsive Design System (Mobile, Tablet, Desktop) */
+/* Crawler Compare - Product Hunt Minimalist Theme with Real Auth & Onboarding */
 
 :root {
   --bg-page: #f8fafc;
@@ -50,7 +50,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Responsive Header Navbar */
+/* Header Navbar */
 .navbar {
   position: sticky;
   top: 0;
@@ -291,7 +291,7 @@ body {
 .offers-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px; /* Ensures table scrolls smoothly on small screens */
+  min-width: 600px;
 }
 
 .offers-table th {
@@ -382,6 +382,24 @@ body {
   background: var(--badge-store-bg);
   color: var(--badge-store);
   border: 1px solid var(--badge-store-border);
+}
+
+/* Auth Modal Tabs */
+.auth-tab {
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+
+.auth-tab.active {
+  color: var(--primary);
+  background: var(--primary-light);
 }
 
 /* Seller Analytics Dashboard */
@@ -540,8 +558,6 @@ body {
 }
 
 /* Responsive Media Queries */
-
-/* Tablet & Below (<= 768px) */
 @media (max-width: 768px) {
   .navbar {
     padding: 10px 16px;
@@ -561,7 +577,6 @@ body {
   }
 }
 
-/* Mobile Screens (<= 480px) */
 @media (max-width: 480px) {
   .navbar {
     flex-direction: row;
@@ -571,7 +586,7 @@ body {
     display: none;
   }
   .btn-firecrawl {
-    display: none; /* Keep primary header uncluttered on small mobile */
+    display: none;
   }
   .analytics-grid {
     grid-template-columns: 1fr;

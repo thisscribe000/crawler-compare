@@ -1,7 +1,34 @@
-// Crawler Compare - Nigerian Dataset & Storage Engine (Multi-Role & Click Analytics)
+// Crawler Compare - Dataset & Production Storage Engine
+
+const INITIAL_USERS = [
+  {
+    id: 'usr-1',
+    email: 'abujagadget@gmail.com',
+    password: 'password123',
+    role: 'seller',
+    sellerId: 'sel-1',
+    name: 'AbujaGadgetHub'
+  },
+  {
+    id: 'usr-2',
+    email: 'ikejatech@gmail.com',
+    password: 'password123',
+    role: 'seller',
+    sellerId: 'sel-2',
+    name: 'IkejaTechMaster'
+  },
+  {
+    id: 'usr-admin',
+    email: 'admin@crawlercompare.ng',
+    password: 'adminpassword',
+    role: 'admin',
+    name: 'System Admin'
+  }
+];
 
 const INITIAL_DATA = {
-  activeRole: 'buyer', // 'buyer', 'seller', 'admin'
+  activeUser: null, // null for guest/buyer, or user object
+  users: INITIAL_USERS,
   cities: [
     { id: 'all', name: 'All Nigeria' },
     { id: 'abuja', name: 'Abuja (FCT)' },
@@ -85,27 +112,9 @@ const INITIAL_DATA = {
       totalClicks: 2400,
       status: 'verified',
       bio: 'Leading e-commerce marketplace in Nigeria.'
-    },
-    {
-      id: 'sel-5',
-      name: 'NewAgeGadgets_Abuja',
-      handle: '@newage_abj',
-      city: 'abuja',
-      location: 'Gwarinpa Plaza, Abuja',
-      phone: '2348199998888',
-      whatsapp: '2348199998888',
-      badge: 'blue',
-      badgeTitle: 'ID Verified Vendor',
-      upvotes: 24,
-      rating: 4.6,
-      salesCount: 18,
-      totalClicks: 65,
-      status: 'pending',
-      bio: 'Pre-owned devices and accessories in Gwarinpa.'
     }
   ],
 
-  // Grouped Master Products (Product Comparison Model)
   productGroups: [
     {
       id: 'group-iphone15pm',
@@ -186,7 +195,6 @@ const INITIAL_DATA = {
     }
   ],
 
-  // Click Tracking Analytics Log
   clickLogs: [
     { id: 'clk-1', sellerId: 'sel-1', offerId: 'offer-1', timestamp: '2026-09-02 08:15', city: 'abuja' },
     { id: 'clk-2', sellerId: 'sel-2', offerId: 'offer-2', timestamp: '2026-09-02 08:20', city: 'lagos' }
@@ -217,22 +225,119 @@ const INITIAL_DATA = {
 // Data Store Manager
 class DataStore {
   constructor() {
-    this.data = JSON.parse(localStorage.getItem('crawler_compare_v2_db')) || INITIAL_DATA;
+    this.data = JSON.parse(localStorage.getItem('crawler_compare_v3_db')) || INITIAL_DATA;
     this.userUpvotes = JSON.parse(localStorage.getItem('crawler_compare_upvotes')) || {};
   }
 
   save() {
-    localStorage.setItem('crawler_compare_v2_db', JSON.stringify(this.data));
+    localStorage.setItem('crawler_compare_v3_db', JSON.stringify(this.data));
     localStorage.setItem('crawler_compare_upvotes', JSON.stringify(this.userUpvotes));
   }
 
-  setRole(role) {
-    this.data.activeRole = role;
+  // Authentication & Registration
+  registerUser({ email, password, role, name, shopName, city, location, whatsapp, bio }) {
+    const existing = this.data.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    if (existing) {
+      throw new Error('An account with this email already exists.');
+    }
+
+    let sellerId = null;
+
+    if (role === 'seller') {
+      sellerId = 'sel-' + Date.now();
+      const newSeller = {
+        id: sellerId,
+        name: shopName || name,
+        handle: '@' + (shopName || name).toLowerCase().replace(/\s+/g, ''),
+        city: city || 'abuja',
+        location: location || 'Abuja Central Market',
+        phone: whatsapp || '2348000000000',
+        whatsapp: whatsapp || '2348000000000',
+        badge: 'blue',
+        badgeTitle: 'ID Verified Vendor',
+        upvotes: 1,
+        rating: 5.0,
+        salesCount: 1,
+        totalClicks: 0,
+        status: 'verified',
+        bio: bio || `Verified vendor located in ${location}.`
+      };
+      this.data.sellers.push(newSeller);
+    }
+
+    const newUser = {
+      id: 'usr-' + Date.now(),
+      email,
+      password,
+      role,
+      sellerId,
+      name: shopName || name
+    };
+
+    this.data.users.push(newUser);
+    this.data.activeUser = newUser;
+    this.save();
+    return newUser;
+  }
+
+  loginUser(email, password) {
+    const user = this.data.users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+    if (!user) {
+      throw new Error('Invalid email or password.');
+    }
+    this.data.activeUser = user;
+    this.save();
+    return user;
+  }
+
+  logoutUser() {
+    this.data.activeUser = null;
     this.save();
   }
 
-  getRole() {
-    return this.data.activeRole || 'buyer';
+  getActiveUser() {
+    return this.data.activeUser;
+  }
+
+  // Inventory Offer Creation
+  addInventoryOffer({ title, category, price, condition, city, location, outlink }) {
+    const activeUser = this.getActiveUser();
+    const sellerId = (activeUser && activeUser.sellerId) ? activeUser.sellerId : 'sel-1';
+
+    let existingGroup = this.data.productGroups.find(g => g.title.toLowerCase().includes(title.toLowerCase()));
+
+    const newOffer = {
+      id: 'offer-' + Date.now(),
+      sellerId: sellerId,
+      price: parseFloat(price),
+      condition: condition || 'Brand New (Verified Stock)',
+      city: city || 'abuja',
+      location: location || 'Abuja Market',
+      source: 'Direct Vendor Listing',
+      outlink: outlink || 'https://instagram.com',
+      clicks: 0
+    };
+
+    if (existingGroup) {
+      existingGroup.offers.unshift(newOffer);
+      existingGroup.offersCount = existingGroup.offers.length;
+      existingGroup.minPrice = Math.min(...existingGroup.offers.map(o => o.price));
+      existingGroup.maxPrice = Math.max(...existingGroup.offers.map(o => o.price));
+    } else {
+      this.data.productGroups.unshift({
+        id: 'group-' + Date.now(),
+        title: title,
+        category: category || 'phones',
+        image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&auto=format&fit=crop&q=80',
+        minPrice: parseFloat(price),
+        maxPrice: parseFloat(price),
+        offersCount: 1,
+        offers: [newOffer]
+      });
+    }
+
+    this.save();
+    return newOffer;
   }
 
   // Click Tracking Engine
@@ -251,7 +356,6 @@ class DataStore {
     });
 
     this.save();
-    console.log(`[Analytics] Tracked Outbound Click for Seller: ${seller ? seller.name : sellerId}`);
   }
 
   getProductGroups(filters = {}) {
@@ -284,26 +388,6 @@ class DataStore {
 
   getReviews(sellerId) {
     return this.data.reviews.filter(r => r.sellerId === sellerId);
-  }
-
-  calculateMeritRank(seller, offer) {
-    if (!seller) return 0;
-    let score = (seller.upvotes * 2) + (seller.rating * 10) + (seller.salesCount * 3) + (seller.totalClicks * 0.5);
-    if (seller.badge === 'gold') score += 100;
-    return Math.round(score);
-  }
-
-  toggleUpvote(offerId) {
-    const hasUpvoted = !!this.userUpvotes[offerId];
-
-    if (hasUpvoted) {
-      delete this.userUpvotes[offerId];
-    } else {
-      this.userUpvotes[offerId] = true;
-    }
-
-    this.save();
-    return !hasUpvoted;
   }
 
   addReview(sellerId, author, rating, comment) {
