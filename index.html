@@ -3,40 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Crawler Compare - Price Aggregator & Click Analytics Platform</title>
-  <meta name="description" content="Search product models to compare sellers across Jumia, Konga, Jiji, and Instagram with tracked out-links and seller analytics.">
+  <title>Crawler Compare - Price Aggregator & Vendor Trust Platform</title>
+  <meta name="description" content="Compare product prices across Abuja, Lagos, Port Harcourt & Kano. Find verified sellers with community upvotes & merit rank badges.">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- Navigation Bar -->
+  <!-- Navigation Bar (Clean Public Header) -->
   <header class="navbar">
     <div class="logo-container">
       <div class="logo-icon">C</div>
       <div class="logo-text">
         <h1>Crawler Compare</h1>
-        <p>Price Aggregator & Vendor Platform</p>
+        <p>Price Aggregator & Vendor Trust</p>
       </div>
     </div>
-    
-    <!-- Multi-Role Switcher Tabs -->
-    <div class="role-switcher">
-      <button class="role-tab active" data-role="buyer">Buyer Mode</button>
-      <button class="role-tab" data-role="seller">Seller Dashboard</button>
-      <button class="role-tab" data-role="admin">Admin Console</button>
-    </div>
 
+    <!-- Header Actions & Account Status -->
     <div class="nav-actions">
       <button class="btn btn-firecrawl" id="triggerScrapeBtn">
         Firecrawl Live Search
       </button>
+
+      <!-- Auth State Button (Dynamic) -->
+      <div id="authNavContainer">
+        <button class="btn btn-outline" id="openAuthModalBtn">
+          Vendor / Admin Login
+        </button>
+      </div>
     </div>
   </header>
 
   <!-- Main Content Container -->
   <main class="container">
     
-    <!-- ==================== 1. BUYER MODE VIEW ==================== -->
+    <!-- ==================== 1. PUBLIC BUYER SEARCH VIEW ==================== -->
     <section id="buyerView">
       <!-- Hero Section -->
       <section class="hero">
@@ -74,15 +75,18 @@
 
       <!-- Grouped Products List -->
       <section class="grouped-products-container" id="groupedProductsContainer">
-        <!-- Dynamically populated product model cards with seller offer breakdowns -->
+        <!-- Dynamically populated product model cards -->
       </section>
     </section>
 
-    <!-- ==================== 2. SELLER DASHBOARD VIEW ==================== -->
+    <!-- ==================== 2. PRIVATE SELLER DASHBOARD VIEW (Requires Seller Login) ==================== -->
     <section id="sellerView" style="display: none;">
       <div class="dashboard-header">
-        <h2>Seller Analytics & Inventory Dashboard</h2>
-        <p>Track your outbound buyer clicks, conversion metrics, and manage listed products.</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h2>Vendor Analytics & Inventory Dashboard</h2>
+          <button class="btn btn-primary" id="openAddProductBtn">+ List New Inventory</button>
+        </div>
+        <p>Private seller portal for <strong id="sellerAccountName">AbujaGadgetHub</strong>. Track outbound buyer clicks and manage listings.</p>
       </div>
 
       <!-- Analytics Cards Row -->
@@ -100,11 +104,11 @@
         <div class="stat-card">
           <div class="stat-title">Completed Verified Deals</div>
           <div class="stat-value" id="sellerDeals">142</div>
-          <div class="stat-desc">Customer Reviews: 4.9/5</div>
+          <div class="stat-desc">Customer Rating: 4.9 / 5</div>
         </div>
         <div class="stat-card">
-          <div class="stat-title">Verification Tier</div>
-          <div class="stat-value" style="color: #d97706; font-size: 20px;" id="sellerBadgeTitle">Gold Merit Vendor</div>
+          <div class="stat-title">Verification Status</div>
+          <div class="stat-value" style="color: #d97706; font-size: 18px;" id="sellerBadgeTitle">Gold Merit Vendor</div>
           <div class="stat-desc">Earned Rank Badge</div>
         </div>
       </div>
@@ -129,15 +133,15 @@
       </div>
     </section>
 
-    <!-- ==================== 3. ADMIN CONSOLE VIEW ==================== -->
+    <!-- ==================== 3. PRIVATE ADMIN CONSOLE VIEW (Requires Admin Login) ==================== -->
     <section id="adminView" style="display: none;">
       <div class="dashboard-header">
         <h2>System Admin Console</h2>
-        <p>Manage vendor verification requests, role privileges, and crawler job status.</p>
+        <p>Manage vendor verification applications and trust tier permissions.</p>
       </div>
 
       <div class="dashboard-section">
-        <h3>Pending Vendor Verification Queue</h3>
+        <h3>Vendor Verification Queue</h3>
         <table class="data-table">
           <thead>
             <tr>
@@ -156,6 +160,76 @@
     </section>
 
   </main>
+
+  <!-- Login / Auth Modal -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-box">
+      <button class="modal-close" id="closeAuthModal">&times;</button>
+      <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 6px; color: var(--text-dark);">Sign In to Account</h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Access your private Seller Analytics Dashboard or Admin Console.</p>
+
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+        <button class="btn btn-outline" id="demoSellerLoginBtn" style="justify-content: center; padding: 12px;">
+          🔑 Demo Sign In as Vendor (@AbujaGadgetHub)
+        </button>
+        <button class="btn btn-outline" id="demoAdminLoginBtn" style="justify-content: center; padding: 12px;">
+          🛡️ Demo Sign In as System Admin
+        </button>
+      </div>
+
+      <div style="border-top: 1px solid var(--border-color); padding-top: 16px; text-align: center;">
+        <button class="btn btn-outline" id="continueBuyerBtn" style="width: 100%;">
+          Continue Browsing as Public Buyer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vendor Inventory Addition Modal -->
+  <div class="modal-overlay" id="addModal">
+    <div class="modal-box">
+      <button class="modal-close" id="closeAddModal">&times;</button>
+      <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 4px; color: var(--text-dark);">Add Product Offer</h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">List a new product offer to track out-links and receive buyer inquiries.</p>
+      
+      <form id="addProductForm">
+        <div class="form-group">
+          <label>Product Title</label>
+          <input type="text" class="form-control" id="formTitle" placeholder="e.g. Samsung S24 Ultra 512GB" required>
+        </div>
+
+        <div class="form-group" style="display: flex; gap: 10px;">
+          <div style="flex: 1;">
+            <label>Price (NGN)</label>
+            <input type="number" class="form-control" id="formPrice" placeholder="1500000" required>
+          </div>
+          <div style="flex: 1;">
+            <label>City</label>
+            <select class="form-control" id="formCity">
+              <option value="abuja">Abuja (FCT)</option>
+              <option value="lagos">Lagos State</option>
+              <option value="ph">Port Harcourt</option>
+              <option value="kano">Kano</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Location / Store Address</label>
+          <input type="text" class="form-control" id="formLocation" placeholder="e.g. Suite B12, Banex Plaza, Wuse 2" required>
+        </div>
+
+        <div class="form-group">
+          <label>Outbound Link / Store URL</label>
+          <input type="url" class="form-control" id="formOutlink" placeholder="https://instagram.com/yourhandle or website URL" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px; padding: 12px;">
+          Publish Inventory Offer
+        </button>
+      </form>
+    </div>
+  </div>
 
   <!-- Seller Reviews Modal -->
   <div class="modal-overlay" id="reviewsModal">

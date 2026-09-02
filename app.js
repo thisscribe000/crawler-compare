@@ -1,8 +1,7 @@
-// Crawler Compare - Main Application Logic (Product Grouping, Multi-Role & Click Analytics)
+// Crawler Compare - Main Application Logic (Role Authentication & Public/Private Views)
 
 document.addEventListener('DOMContentLoaded', () => {
   // DOM Elements
-  const roleTabs = document.querySelectorAll('.role-tab');
   const buyerView = document.getElementById('buyerView');
   const sellerView = document.getElementById('sellerView');
   const adminView = document.getElementById('adminView');
@@ -15,32 +14,104 @@ document.addEventListener('DOMContentLoaded', () => {
   const triggerScrapeBtn = document.getElementById('triggerScrapeBtn');
   const liveScrapeBanner = document.getElementById('liveScrapeBanner');
 
+  const authNavContainer = document.getElementById('authNavContainer');
+  const authModal = document.getElementById('authModal');
+  const openAuthModalBtn = document.getElementById('openAuthModalBtn');
+  const closeAuthModal = document.getElementById('closeAuthModal');
+  const demoSellerLoginBtn = document.getElementById('demoSellerLoginBtn');
+  const demoAdminLoginBtn = document.getElementById('demoAdminLoginBtn');
+  const continueBuyerBtn = document.getElementById('continueBuyerBtn');
+
+  const addModal = document.getElementById('addModal');
+  const openAddProductBtn = document.getElementById('openAddProductBtn');
+  const closeAddModal = document.getElementById('closeAddModal');
+  const addProductForm = document.getElementById('addProductForm');
+
   const reviewsModal = document.getElementById('reviewsModal');
   const closeReviewsModal = document.getElementById('closeReviewsModal');
   const reviewsModalContent = document.getElementById('reviewsModalContent');
 
-  // Role Switching Logic
-  roleTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      roleTabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      const role = tab.getAttribute('data-role');
-      window.db.setRole(role);
-      updateRoleView(role);
-    });
-  });
+  // Active Session State (null = Public Buyer, 'seller' = Vendor, 'admin' = Admin)
+  let currentUser = JSON.parse(localStorage.getItem('crawler_compare_user')) || null;
 
-  function updateRoleView(role) {
-    buyerView.style.display = role === 'buyer' ? 'block' : 'none';
-    sellerView.style.display = role === 'seller' ? 'block' : 'none';
-    adminView.style.display = role === 'admin' ? 'block' : 'none';
+  // View Controller based on Session State
+  function renderActiveView() {
+    if (!currentUser) {
+      // 1. PUBLIC BUYER MODE (Default for all visitors)
+      buyerView.style.display = 'block';
+      sellerView.style.display = 'none';
+      adminView.style.display = 'none';
 
-    if (role === 'buyer') renderGroupedProducts();
-    if (role === 'seller') renderSellerDashboard();
-    if (role === 'admin') renderAdminConsole();
+      authNavContainer.innerHTML = `
+        <button class="btn btn-outline" id="openAuthModalBtn">
+          Vendor / Admin Login
+        </button>
+      `;
+      document.getElementById('openAuthModalBtn').addEventListener('click', () => authModal.classList.add('active'));
+      renderGroupedProducts();
+
+    } else if (currentUser.role === 'seller') {
+      // 2. PRIVATE SELLER DASHBOARD
+      buyerView.style.display = 'none';
+      sellerView.style.display = 'block';
+      adminView.style.display = 'none';
+
+      authNavContainer.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 12px; font-weight: 700; color: var(--text-dark); background: #f1f5f9; padding: 6px 12px; border-radius: 16px;">
+            Vendor: ${currentUser.name}
+          </span>
+          <button class="btn btn-outline" id="logoutBtn" style="padding: 6px 12px; font-size: 12px;">Log Out</button>
+        </div>
+      `;
+      document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+      renderSellerDashboard();
+
+    } else if (currentUser.role === 'admin') {
+      // 3. PRIVATE ADMIN CONSOLE
+      buyerView.style.display = 'none';
+      sellerView.style.display = 'none';
+      adminView.style.display = 'block';
+
+      authNavContainer.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 12px; font-weight: 700; color: #dc2626; background: #fee2e2; padding: 6px 12px; border-radius: 16px;">
+            System Admin
+          </span>
+          <button class="btn btn-outline" id="logoutBtn" style="padding: 6px 12px; font-size: 12px;">Log Out</button>
+        </div>
+      `;
+      document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+      renderAdminConsole();
+    }
   }
 
-  // Render Grouped Products (Buyer Mode)
+  function handleLogout() {
+    currentUser = null;
+    localStorage.removeItem('crawler_compare_user');
+    renderActiveView();
+  }
+
+  // Auth Modal Event Handlers
+  openAuthModalBtn.addEventListener('click', () => authModal.classList.add('active'));
+  closeAuthModal.addEventListener('click', () => authModal.classList.remove('active'));
+  continueBuyerBtn.addEventListener('click', () => authModal.classList.remove('active'));
+
+  demoSellerLoginBtn.addEventListener('click', () => {
+    currentUser = { role: 'seller', sellerId: 'sel-1', name: 'AbujaGadgetHub' };
+    localStorage.setItem('crawler_compare_user', JSON.stringify(currentUser));
+    authModal.classList.remove('active');
+    renderActiveView();
+  });
+
+  demoAdminLoginBtn.addEventListener('click', () => {
+    currentUser = { role: 'admin', name: 'System Admin' };
+    localStorage.setItem('crawler_compare_user', JSON.stringify(currentUser));
+    authModal.classList.remove('active');
+    renderActiveView();
+  });
+
+  // Render Grouped Products (Public Buyer Mode)
   function renderGroupedProducts() {
     const filters = {
       search: searchInput.value,
@@ -68,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const groupCard = document.createElement('div');
       groupCard.className = 'group-card';
 
-      // Sort offers by price ascending (Best price first)
       const sortedOffers = [...group.offers].sort((a, b) => a.price - b.price);
 
       let offersTableRows = sortedOffers.map(offer => {
@@ -144,16 +214,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function attachBuyerEvents() {
-    // Track Out-link Clicks
     document.querySelectorAll('.btn-outlink').forEach(link => {
-      link.addEventListener('click', (e) => {
+      link.addEventListener('click', () => {
         const sellerId = link.getAttribute('data-seller');
         const offerId = link.getAttribute('data-offer');
         window.db.recordOutlinkClick(sellerId, offerId);
       });
     });
 
-    // Reviews Modal Event
     document.querySelectorAll('.btn-reviews').forEach(btn => {
       btn.addEventListener('click', () => {
         const sellerId = btn.getAttribute('data-seller');
@@ -162,11 +230,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Render Seller Analytics Dashboard
+  // Render Private Seller Dashboard
   function renderSellerDashboard() {
-    const seller = window.db.getSeller('sel-1'); // Demo viewing AbujaGadgetHub
+    const sellerId = currentUser ? currentUser.sellerId : 'sel-1';
+    const seller = window.db.getSeller(sellerId) || window.db.getSeller('sel-1');
     if (!seller) return;
 
+    document.getElementById('sellerAccountName').textContent = seller.name;
     document.getElementById('sellerTotalClicks').textContent = seller.totalClicks || 0;
     document.getElementById('sellerUpvotes').textContent = seller.upvotes || 0;
     document.getElementById('sellerDeals').textContent = seller.salesCount || 0;
@@ -175,10 +245,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const logsTable = document.getElementById('clickLogsTableBody');
     logsTable.innerHTML = '';
 
-    const logs = window.db.data.clickLogs.filter(l => l.sellerId === seller.id || l.sellerId === 'sel-1');
+    const logs = window.db.data.clickLogs.filter(l => l.sellerId === seller.id);
 
     if (logs.length === 0) {
-      logsTable.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No outbound click activity logged yet.</td></tr>`;
+      logsTable.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No outbound buyer click activity logged yet.</td></tr>`;
       return;
     }
 
@@ -188,14 +258,14 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${log.timestamp}</td>
         <td><strong>iPhone 15 Pro Max (256GB)</strong></td>
         <td>📍 ${log.city.toUpperCase()}</td>
-        <td><code>Instagram Direct Out-Link</code></td>
+        <td><code>Instagram Store Out-Link</code></td>
         <td><span style="color: #059669; font-weight: 700;">Tracked Click</span></td>
       `;
       logsTable.appendChild(tr);
     });
   }
 
-  // Render Admin Console
+  // Render Private Admin Console
   function renderAdminConsole() {
     const adminQueueTable = document.getElementById('adminQueueTableBody');
     adminQueueTable.innerHTML = '';
@@ -296,15 +366,49 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Filter Event Listeners
+  // Seller Offer Addition Form
+  if (openAddProductBtn) {
+    openAddProductBtn.addEventListener('click', () => addModal.classList.add('active'));
+  }
+  closeAddModal.addEventListener('click', () => addModal.classList.remove('active'));
+
+  addProductForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const title = document.getElementById('formTitle').value;
+    const price = parseFloat(document.getElementById('formPrice').value);
+    const city = document.getElementById('formCity').value;
+    const location = document.getElementById('formLocation').value;
+    const outlink = document.getElementById('formOutlink').value;
+
+    const sellerId = currentUser ? currentUser.sellerId : 'sel-1';
+
+    // Add offer to default group
+    if (window.db.data.productGroups.length > 0) {
+      window.db.data.productGroups[0].offers.unshift({
+        id: 'offer-' + Date.now(),
+        sellerId: sellerId,
+        price: price,
+        condition: title + ' (New Offer)',
+        city: city,
+        location: location,
+        source: 'Vendor Direct Entry',
+        outlink: outlink,
+        clicks: 0
+      });
+      window.db.save();
+    }
+
+    addProductForm.reset();
+    addModal.classList.remove('active');
+    renderActiveView();
+  });
+
+  // Filter Listeners
   searchInput.addEventListener('input', renderGroupedProducts);
   citySelect.addEventListener('change', renderGroupedProducts);
   categorySelect.addEventListener('change', renderGroupedProducts);
 
   closeReviewsModal.addEventListener('click', () => reviewsModal.classList.remove('active'));
-  reviewsModal.addEventListener('click', (e) => {
-    if (e.target === reviewsModal) reviewsModal.classList.remove('active');
-  });
 
   // Firecrawl Search Trigger
   triggerScrapeBtn.addEventListener('click', async () => {
@@ -317,7 +421,6 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const liveResults = await window.firecrawlService.searchMarket(query, city);
       
-      // Group live results under master product
       window.db.data.productGroups.unshift({
         id: 'group-' + Date.now(),
         title: `${query} (Live Search Scrape)`,
@@ -335,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
           location: r.location,
           source: r.source,
           outlink: 'https://instagram.com/abujagadgethub',
-          clicks: 12
+          clicks: 0
         }))
       });
 
@@ -352,5 +455,5 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Initial Render
-  renderGroupedProducts();
+  renderActiveView();
 });
