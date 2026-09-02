@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>Crawler Compare - Price Aggregator & Vendor Trust Platform</title>
   <meta name="description" content="Compare product prices across Abuja, Lagos, Port Harcourt & Kano. Find verified sellers with community upvotes & merit rank badges.">
   <link rel="stylesheet" href="styles.css">
@@ -22,7 +22,7 @@
     <!-- Header Actions & Account Status -->
     <div class="nav-actions">
       <button class="btn btn-firecrawl" id="triggerScrapeBtn">
-        Firecrawl Live Search
+        Firecrawl Search
       </button>
 
       <!-- Auth State Button (Dynamic) -->
@@ -82,7 +82,7 @@
     <!-- ==================== 2. PRIVATE SELLER DASHBOARD VIEW (Requires Seller Login) ==================== -->
     <section id="sellerView" style="display: none;">
       <div class="dashboard-header">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 10px;">
           <h2>Vendor Analytics & Inventory Dashboard</h2>
           <button class="btn btn-primary" id="openAddProductBtn">+ List New Inventory</button>
         </div>
@@ -116,20 +116,22 @@
       <!-- Out-link Click Activity Log Table -->
       <div class="dashboard-section">
         <h3>Recent Buyer Click Activity (Tracked Links)</h3>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Timestamp</th>
-              <th>Product Model</th>
-              <th>Buyer Location</th>
-              <th>Outbound Destination</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="clickLogsTableBody">
-            <!-- Dynamically populated -->
-          </tbody>
-        </table>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Product Model</th>
+                <th>Buyer Location</th>
+                <th>Outbound Destination</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="clickLogsTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -142,20 +144,22 @@
 
       <div class="dashboard-section">
         <h3>Vendor Verification Queue</h3>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Vendor Name</th>
-              <th>City Location</th>
-              <th>Current Tier</th>
-              <th>Total Clicks</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="adminQueueTableBody">
-            <!-- Dynamically populated -->
-          </tbody>
-        </table>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Vendor Name</th>
+                <th>City Location</th>
+                <th>Current Tier</th>
+                <th>Total Clicks</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminQueueTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -168,7 +172,7 @@
       <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 6px; color: var(--text-dark);">Sign In to Account</h3>
       <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Access your private Seller Analytics Dashboard or Admin Console.</p>
 
-      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
         <button class="btn btn-outline" id="demoSellerLoginBtn" style="justify-content: center; padding: 12px;">
           🔑 Demo Sign In as Vendor (@AbujaGadgetHub)
         </button>

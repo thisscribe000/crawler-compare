@@ -1,4 +1,4 @@
-// Crawler Compare - Main Application Logic (Role Authentication & Public/Private Views)
+// Crawler Compare - Main Application Logic (Responsive & Grouped Comparison)
 
 document.addEventListener('DOMContentLoaded', () => {
   // DOM Elements
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // View Controller based on Session State
   function renderActiveView() {
     if (!currentUser) {
-      // 1. PUBLIC BUYER MODE (Default for all visitors)
+      // 1. PUBLIC BUYER MODE (Default)
       buyerView.style.display = 'block';
       sellerView.style.display = 'none';
       adminView.style.display = 'none';
@@ -57,11 +57,11 @@ document.addEventListener('DOMContentLoaded', () => {
       adminView.style.display = 'none';
 
       authNavContainer.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <span style="font-size: 12px; font-weight: 700; color: var(--text-dark); background: #f1f5f9; padding: 6px 12px; border-radius: 16px;">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span style="font-size: 11px; font-weight: 700; color: var(--text-dark); background: #f1f5f9; padding: 5px 10px; border-radius: 14px;">
             Vendor: ${currentUser.name}
           </span>
-          <button class="btn btn-outline" id="logoutBtn" style="padding: 6px 12px; font-size: 12px;">Log Out</button>
+          <button class="btn btn-outline" id="logoutBtn" style="padding: 5px 10px; font-size: 11px;">Log Out</button>
         </div>
       `;
       document.getElementById('logoutBtn').addEventListener('click', handleLogout);
@@ -74,11 +74,11 @@ document.addEventListener('DOMContentLoaded', () => {
       adminView.style.display = 'block';
 
       authNavContainer.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <span style="font-size: 12px; font-weight: 700; color: #dc2626; background: #fee2e2; padding: 6px 12px; border-radius: 16px;">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span style="font-size: 11px; font-weight: 700; color: #dc2626; background: #fee2e2; padding: 5px 10px; border-radius: 14px;">
             System Admin
           </span>
-          <button class="btn btn-outline" id="logoutBtn" style="padding: 6px 12px; font-size: 12px;">Log Out</button>
+          <button class="btn btn-outline" id="logoutBtn" style="padding: 5px 10px; font-size: 11px;">Log Out</button>
         </div>
       `;
       document.getElementById('logoutBtn').addEventListener('click', handleLogout);
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderActiveView();
   }
 
-  // Auth Modal Event Handlers
+  // Auth Modal Handlers
   openAuthModalBtn.addEventListener('click', () => authModal.classList.add('active'));
   closeAuthModal.addEventListener('click', () => authModal.classList.remove('active'));
   continueBuyerBtn.addEventListener('click', () => authModal.classList.remove('active'));
@@ -124,9 +124,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (groups.length === 0) {
       groupedProductsContainer.innerHTML = `
-        <div style="text-align: center; padding: 48px 20px; background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
-          <h3 style="font-size: 16px; font-weight: 700; color: var(--text-dark); margin-bottom: 6px;">No Matching Product Models Found</h3>
-          <p style="font-size: 13px; color: var(--text-muted);">Try adjusting your search query or click <strong>Firecrawl Live Search</strong> to pull live market listings.</p>
+        <div style="text-align: center; padding: 40px 16px; background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+          <h3 style="font-size: 15px; font-weight: 700; color: var(--text-dark); margin-bottom: 6px;">No Matching Product Models Found</h3>
+          <p style="font-size: 13px; color: var(--text-muted);">Try adjusting your search query or click <strong>Firecrawl Search</strong> to pull live market listings.</p>
         </div>
       `;
       return;
@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <tr>
             <td>
               <div style="font-weight: 700; color: var(--text-dark);">${seller.name} ${badgeTag}</div>
-              <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">⭐ ${seller.rating} / 5 Rating • ${seller.salesCount} Deals</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">⭐ ${seller.rating} / 5 • ${seller.salesCount} Deals</div>
             </td>
             <td>
               <div>${offer.condition}</div>
@@ -170,10 +170,10 @@ document.addEventListener('DOMContentLoaded', () => {
               <div style="font-size: 11px; color: var(--text-muted);">${offer.source}</div>
             </td>
             <td style="text-align: right;">
-              <div style="display: flex; gap: 8px; justify-content: flex-end;">
+              <div style="display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap;">
                 <button class="btn-reviews" data-seller="${seller.id}">Reviews</button>
                 <a href="${offer.outlink}" target="_blank" rel="noopener" class="btn-outlink" data-seller="${seller.id}" data-offer="${offer.id}">
-                  Visit Store / Outlink ↗
+                  Visit Store ↗
                 </a>
               </div>
             </td>
@@ -187,24 +187,26 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="group-info">
             <h3 class="group-title">${group.title}</h3>
             <div class="group-price-range">
-              Price Range: <strong>${minPriceFormatted} - ${maxPriceFormatted}</strong> (${group.offers.length} Sellers Available)
+              Price Range: <strong>${minPriceFormatted} - ${maxPriceFormatted}</strong> (${group.offers.length} Sellers)
             </div>
           </div>
         </div>
 
-        <table class="offers-table">
-          <thead>
-            <tr>
-              <th>Seller & Trust Tier</th>
-              <th>Condition & Location</th>
-              <th>Price & Source</th>
-              <th style="text-align: right;">Tracked Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${offersTableRows}
-          </tbody>
-        </table>
+        <div class="table-responsive">
+          <table class="offers-table">
+            <thead>
+              <tr>
+                <th>Seller & Trust Tier</th>
+                <th>Condition & Location</th>
+                <th>Price & Source</th>
+                <th style="text-align: right;">Tracked Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${offersTableRows}
+            </tbody>
+          </table>
+        </div>
       `;
 
       groupedProductsContainer.appendChild(groupCard);
@@ -279,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${seller.totalClicks || 0} clicks</td>
         <td>
           ${seller.badge === 'gold' ? '<span style="color:#059669; font-weight:600;">Verified Elite</span>' : `
-            <button class="btn btn-primary btn-verify" data-seller="${seller.id}" style="padding: 4px 10px; font-size: 11px;">
+            <button class="btn btn-primary btn-verify" data-seller="${seller.id}" style="padding: 4px 8px; font-size: 11px;">
               Promote to Gold Merit
             </button>
           `}
@@ -304,28 +306,28 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!seller) return;
 
     reviewsModalContent.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
-        <div style="width: 44px; height: 44px; border-radius: 50%; background: #0f172a; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px;">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border-color);">
+        <div style="width: 40px; height: 40px; border-radius: 50%; background: #0f172a; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0;">
           ${seller.name[0]}
         </div>
         <div>
-          <h3 style="font-size: 16px; font-weight: 700; color: var(--text-dark);">${seller.name}</h3>
+          <h3 style="font-size: 15px; font-weight: 700; color: var(--text-dark);">${seller.name}</h3>
           <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">${seller.location} • ${seller.badgeTitle}</p>
         </div>
       </div>
 
-      <div style="display: flex; gap: 16px; margin-bottom: 16px; background: #f8fafc; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px;">
+      <div style="display: flex; gap: 12px; margin-bottom: 14px; background: #f8fafc; padding: 10px; border-radius: var(--radius-sm); font-size: 12px; flex-wrap: wrap;">
         <div><strong>Rating:</strong> ${seller.rating} / 5.0</div>
         <div><strong>Outbound Clicks:</strong> ${seller.totalClicks || 0}</div>
-        <div><strong>Completed Deals:</strong> ${seller.salesCount}</div>
+        <div><strong>Deals:</strong> ${seller.salesCount}</div>
       </div>
 
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.4;">${seller.bio}</p>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4;">${seller.bio}</p>
 
-      <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 10px; color: var(--text-dark);">Community Reviews (${reviews.length})</h4>
+      <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--text-dark);">Community Reviews (${reviews.length})</h4>
 
-      <div style="max-height: 220px; overflow-y: auto; margin-bottom: 20px;">
-        ${reviews.length === 0 ? '<p style="color: var(--text-muted); font-size: 13px;">No community reviews yet.</p>' : ''}
+      <div style="max-height: 200px; overflow-y: auto; margin-bottom: 16px;">
+        ${reviews.length === 0 ? '<p style="color: var(--text-muted); font-size: 12px;">No community reviews yet.</p>' : ''}
         ${reviews.map(r => `
           <div class="review-item">
             <div class="review-header">
@@ -337,10 +339,10 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('')}
       </div>
 
-      <form id="addReviewForm" style="border-top: 1px solid var(--border-color); padding-top: 14px;">
+      <form id="addReviewForm" style="border-top: 1px solid var(--border-color); padding-top: 12px;">
         <div class="form-group" style="display: flex; gap: 8px;">
           <input type="text" class="form-control" id="revAuthor" placeholder="Your Name" required>
-          <select class="form-control" id="revRating" style="width: 130px;" required>
+          <select class="form-control" id="revRating" style="width: 120px;" required>
             <option value="5">5 / 5 Rating</option>
             <option value="4">4 / 5 Rating</option>
           </select>
@@ -382,7 +384,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const sellerId = currentUser ? currentUser.sellerId : 'sel-1';
 
-    // Add offer to default group
     if (window.db.data.productGroups.length > 0) {
       window.db.data.productGroups[0].offers.unshift({
         id: 'offer-' + Date.now(),
