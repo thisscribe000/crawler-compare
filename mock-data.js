@@ -1,6 +1,7 @@
-// Crawler Compare - Nigerian Dataset & Storage Engine (Clean Minimalist Theme)
+// Crawler Compare - Nigerian Dataset & Storage Engine (Multi-Role & Click Analytics)
 
 const INITIAL_DATA = {
+  activeRole: 'buyer', // 'buyer', 'seller', 'admin'
   cities: [
     { id: 'all', name: 'All Nigeria' },
     { id: 'abuja', name: 'Abuja (FCT)' },
@@ -9,20 +10,12 @@ const INITIAL_DATA = {
     { id: 'kano', name: 'Kano' },
     { id: 'ibadan', name: 'Ibadan' }
   ],
-  locations: {
-    abuja: ['Banex Plaza, Wuse 2', 'Maitama', 'Gwarinpa', 'Utako Market', 'Central Area'],
-    lagos: ['Computer Village, Ikeja', 'Lekki Phase 1', 'Yaba', 'Victoria Island', 'Surulere'],
-    ph: ['Garrison, Aba Road', 'GRA Phase 2', 'Rumuokoro'],
-    kano: ['Farm Centre', 'Sabon Gari'],
-    ibadan: ['Dugbe', 'Bodija']
-  },
   categories: [
     { id: 'all', name: 'All Products' },
     { id: 'phones', name: 'Smartphones & Tablets' },
     { id: 'laptops', name: 'Laptops & Computers' },
     { id: 'power', name: 'Generators & Solar Inverters' },
-    { id: 'gaming', name: 'Gaming Consoles & Gear' },
-    { id: 'appliances', name: 'Home Appliances' }
+    { id: 'gaming', name: 'Gaming Consoles & Gear' }
   ],
   sellers: [
     {
@@ -33,14 +26,13 @@ const INITIAL_DATA = {
       location: 'Suite B12, Banex Plaza, Wuse 2',
       phone: '2348039876543',
       whatsapp: '2348039876543',
-      instagram: 'https://instagram.com/abujagadgethub',
-      badge: 'gold', // gold: Elite Merit, blue: ID Verified, store: Official Store
+      badge: 'gold',
       badgeTitle: 'Gold Merit Vendor',
       upvotes: 184,
       rating: 4.9,
       salesCount: 142,
-      joinedYear: '2022',
-      isVerified: true,
+      totalClicks: 428,
+      status: 'verified',
       bio: 'Direct importers of UK/US pre-owned & brand new iPhones, MacBooks, and Samsung flagships in Abuja.'
     },
     {
@@ -51,14 +43,13 @@ const INITIAL_DATA = {
       location: 'No 14 Otigba St, Computer Village, Ikeja',
       phone: '2348123456789',
       whatsapp: '2348123456789',
-      instagram: 'https://instagram.com/ikejatechmaster',
       badge: 'gold',
       badgeTitle: 'Gold Merit Vendor',
       upvotes: 231,
       rating: 4.85,
       salesCount: 310,
-      joinedYear: '2021',
-      isVerified: true,
+      totalClicks: 890,
+      status: 'verified',
       bio: 'Wholesale & retail computer village vendor. Laptops, MacBooks & Gaming Rigs.'
     },
     {
@@ -69,157 +60,138 @@ const INITIAL_DATA = {
       location: 'Nationwide (Ikeja, Wuse 2, PH GRA)',
       phone: '2347007568647',
       whatsapp: '2348000007568',
-      instagram: 'https://instagram.com/slot_ng',
       badge: 'store',
       badgeTitle: 'Official Retailer',
       upvotes: 95,
       rating: 4.5,
       salesCount: 1500,
-      joinedYear: '2015',
-      isVerified: true,
+      totalClicks: 1240,
+      status: 'verified',
       bio: 'Official authorized distributor of mobile phones, electronics, and gadgets in Nigeria.'
     },
     {
       id: 'sel-4',
-      name: 'SolarPowerDirect_PH',
-      handle: '@solarpower_ph',
-      city: 'ph',
-      location: 'Aba Road near Garrison, Port Harcourt',
-      phone: '2348067891234',
-      whatsapp: '2348067891234',
-      instagram: 'https://instagram.com/solarpower_ph',
-      badge: 'blue',
-      badgeTitle: 'ID Verified Vendor',
-      upvotes: 67,
-      rating: 4.7,
-      salesCount: 45,
-      joinedYear: '2023',
-      isVerified: true,
-      bio: 'Inverters, LFP Lithium Batteries, and Felicity Solar systems installation in PH & South-South.'
+      name: 'Jumia Nigeria',
+      handle: '@jumia_ng',
+      city: 'all',
+      location: 'Online Delivery Nationwide',
+      phone: '23418881106',
+      whatsapp: '23418881106',
+      badge: 'store',
+      badgeTitle: 'Official Retailer',
+      upvotes: 120,
+      rating: 4.4,
+      salesCount: 5000,
+      totalClicks: 2400,
+      status: 'verified',
+      bio: 'Leading e-commerce marketplace in Nigeria.'
     },
     {
       id: 'sel-5',
-      name: 'KanoGenEmpire',
-      handle: '@kanogenempire',
-      city: 'kano',
-      location: 'Farm Centre Electronics Market, Kano',
-      phone: '2348155554321',
-      whatsapp: '2348155554321',
-      instagram: 'https://instagram.com/kanogenempire',
+      name: 'NewAgeGadgets_Abuja',
+      handle: '@newage_abj',
+      city: 'abuja',
+      location: 'Gwarinpa Plaza, Abuja',
+      phone: '2348199998888',
+      whatsapp: '2348199998888',
       badge: 'blue',
       badgeTitle: 'ID Verified Vendor',
-      upvotes: 42,
+      upvotes: 24,
       rating: 4.6,
-      salesCount: 29,
-      joinedYear: '2023',
-      isVerified: true,
-      bio: 'Original Sumec Firman, Lutian, and Mikano soundproof generators in Kano.'
+      salesCount: 18,
+      totalClicks: 65,
+      status: 'pending',
+      bio: 'Pre-owned devices and accessories in Gwarinpa.'
     }
   ],
-  products: [
+
+  // Grouped Master Products (Product Comparison Model)
+  productGroups: [
     {
-      id: 'prod-1',
-      title: 'iPhone 15 Pro Max 256GB - Natural Titanium',
+      id: 'group-iphone15pm',
+      title: 'iPhone 15 Pro Max (256GB)',
       category: 'phones',
-      price: 1580000,
-      currency: 'NGN',
-      condition: 'Brand New (Sealed)',
-      sellerId: 'sel-1',
-      city: 'abuja',
-      location: 'Banex Plaza, Wuse 2',
       image: 'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600&auto=format&fit=crop&q=80',
-      source: 'Instagram / Local Shop',
-      isSponsored: false,
-      upvotes: 142,
-      scrapedAt: '10 mins ago',
-      specs: ['256GB Storage', 'A17 Pro Chip', 'Natural Titanium', '1 Year Apple Warranty']
+      minPrice: 1550000,
+      maxPrice: 1720000,
+      offersCount: 3,
+      offers: [
+        {
+          id: 'offer-1',
+          sellerId: 'sel-1',
+          price: 1580000,
+          condition: 'Brand New (Sealed)',
+          city: 'abuja',
+          location: 'Banex Plaza, Wuse 2',
+          source: 'Instagram / Local Shop',
+          outlink: 'https://instagram.com/abujagadgethub',
+          clicks: 142
+        },
+        {
+          id: 'offer-2',
+          sellerId: 'sel-2',
+          price: 1550000,
+          condition: 'Open Box / Like New',
+          city: 'lagos',
+          location: 'Computer Village, Ikeja',
+          source: 'Computer Village Shop',
+          outlink: 'https://instagram.com/ikejatechmaster',
+          clicks: 98
+        },
+        {
+          id: 'offer-3',
+          sellerId: 'sel-3',
+          price: 1720000,
+          condition: 'Brand New (Official Warranty)',
+          city: 'all',
+          location: 'Slot Ikeja / Wuse 2',
+          source: 'Slot Official Site',
+          outlink: 'https://slot.ng/iphone-15-pro-max',
+          clicks: 210
+        }
+      ]
     },
     {
-      id: 'prod-2',
+      id: 'group-macbookm3',
       title: 'Apple MacBook Pro 16" M3 Max (36GB RAM, 1TB SSD)',
       category: 'laptops',
-      price: 3850000,
-      currency: 'NGN',
-      condition: 'Brand New (Space Black)',
-      sellerId: 'sel-2',
-      city: 'lagos',
-      location: 'Computer Village, Ikeja',
       image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&auto=format&fit=crop&q=80',
-      source: 'Computer Village Shop',
-      isSponsored: true,
-      upvotes: 189,
-      scrapedAt: 'Just now',
-      specs: ['M3 Max 14-core CPU', '30-core GPU', '36GB Unified Memory', '1TB NVMe SSD']
-    },
-    {
-      id: 'prod-3',
-      title: 'Felicity 5KVA 48V Hybrid Solar Inverter + 5kWh Lithium Battery',
-      category: 'power',
-      price: 2450000,
-      currency: 'NGN',
-      condition: 'Brand New with Warranty',
-      sellerId: 'sel-4',
-      city: 'ph',
-      location: 'Garrison, Port Harcourt',
-      image: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=600&auto=format&fit=crop&q=80',
-      source: 'Direct Vendor',
-      isSponsored: false,
-      upvotes: 68,
-      scrapedAt: '1 hour ago',
-      specs: ['Pure Sine Wave', '48V System', '5.12kWh LiFePO4 Battery', '2 Year Warranty']
-    },
-    {
-      id: 'prod-4',
-      title: 'PlayStation 5 Slim (Disc Edition) + Extra Controller',
-      category: 'gaming',
-      price: 740000,
-      currency: 'NGN',
-      condition: 'Brand New (Japanese Version)',
-      sellerId: 'sel-1',
-      city: 'abuja',
-      location: 'Wuse 2, Abuja',
-      image: 'https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=600&auto=format&fit=crop&q=80',
-      source: 'Instagram Vendor',
-      isSponsored: false,
-      upvotes: 95,
-      scrapedAt: '25 mins ago',
-      specs: ['1TB SSD Storage', 'Includes 2 DualSense Controllers', 'Slim Redesign']
-    },
-    {
-      id: 'prod-5',
-      title: 'Samsung Galaxy S24 Ultra 512GB (Titanium Gray)',
-      category: 'phones',
-      price: 1720000,
-      currency: 'NGN',
-      condition: 'Brand New (Dual SIM)',
-      sellerId: 'sel-3',
-      city: 'lagos',
-      location: 'Slot Ikeja / Nationwide',
-      image: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=600&auto=format&fit=crop&q=80',
-      source: 'Slot Systems (Official)',
-      isSponsored: false,
-      upvotes: 88,
-      scrapedAt: '45 mins ago',
-      specs: ['Snapdragon 8 Gen 3', '12GB RAM', '512GB Storage', 'S-Pen Included']
-    },
-    {
-      id: 'prod-6',
-      title: 'Sumec Firman 3.5KVA Key Start Generator (ECO3990ES)',
-      category: 'power',
-      price: 365000,
-      currency: 'NGN',
-      condition: 'Brand New 100% Copper',
-      sellerId: 'sel-5',
-      city: 'kano',
-      location: 'Farm Centre, Kano',
-      image: 'https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?w=600&auto=format&fit=crop&q=80',
-      source: 'Kano Local Store',
-      isSponsored: false,
-      upvotes: 54,
-      scrapedAt: '2 hours ago',
-      specs: ['100% Copper Coil', 'Electric Key Start + Recoil', 'Fuel Tank Capacity 15L']
+      minPrice: 3800000,
+      maxPrice: 4100000,
+      offersCount: 2,
+      offers: [
+        {
+          id: 'offer-4',
+          sellerId: 'sel-2',
+          price: 3850000,
+          condition: 'Brand New (Space Black)',
+          city: 'lagos',
+          location: 'Computer Village, Ikeja',
+          source: 'IkejaTechMaster',
+          outlink: 'https://instagram.com/ikejatechmaster',
+          clicks: 189
+        },
+        {
+          id: 'offer-5',
+          sellerId: 'sel-4',
+          price: 4100000,
+          condition: 'Official Retail Stock',
+          city: 'all',
+          location: 'Jumia Online Direct',
+          source: 'Jumia Nigeria',
+          outlink: 'https://jumia.com.ng/macbook-pro-m3-max',
+          clicks: 340
+        }
+      ]
     }
   ],
+
+  // Click Tracking Analytics Log
+  clickLogs: [
+    { id: 'clk-1', sellerId: 'sel-1', offerId: 'offer-1', timestamp: '2026-09-02 08:15', city: 'abuja' },
+    { id: 'clk-2', sellerId: 'sel-2', offerId: 'offer-2', timestamp: '2026-09-02 08:20', city: 'lagos' }
+  ],
+
   reviews: [
     {
       id: 'rev-1',
@@ -227,28 +199,16 @@ const INITIAL_DATA = {
       author: 'Chidi O. (Abuja)',
       rating: 5,
       date: '2 days ago',
-      comment: 'Bought the iPhone 15 Pro Max from their Wuse 2 shop. Smooth deal, tested the IMEI on Apple site right there. Super genuine seller.',
-      upvotes: 14,
+      comment: 'Bought the iPhone 15 Pro Max from their Wuse 2 shop. Smooth deal, tested the IMEI on Apple site right there.',
       verifiedBuyer: true
     },
     {
       id: 'rev-2',
-      sellerId: 'sel-1',
-      author: 'Aisha M. (Maitama)',
-      rating: 5,
-      date: '1 week ago',
-      comment: 'Dispatched via rider to my office in Maitama within 45 minutes of payment. Excellent communication on WhatsApp.',
-      upvotes: 9,
-      verifiedBuyer: true
-    },
-    {
-      id: 'rev-3',
       sellerId: 'sel-2',
       author: 'Emeka K. (Lagos)',
       rating: 5,
       date: '3 days ago',
       comment: 'IkejaTechMaster is 100% legit. Handled my MacBook M3 Max purchase smoothly at Otigba street.',
-      upvotes: 22,
       verifiedBuyer: true
     }
   ]
@@ -257,57 +217,62 @@ const INITIAL_DATA = {
 // Data Store Manager
 class DataStore {
   constructor() {
-    this.data = JSON.parse(localStorage.getItem('crawler_compare_db')) || INITIAL_DATA;
+    this.data = JSON.parse(localStorage.getItem('crawler_compare_v2_db')) || INITIAL_DATA;
     this.userUpvotes = JSON.parse(localStorage.getItem('crawler_compare_upvotes')) || {};
   }
 
   save() {
-    localStorage.setItem('crawler_compare_db', JSON.stringify(this.data));
+    localStorage.setItem('crawler_compare_v2_db', JSON.stringify(this.data));
     localStorage.setItem('crawler_compare_upvotes', JSON.stringify(this.userUpvotes));
   }
 
-  getProducts(filters = {}) {
-    let result = [...this.data.products];
+  setRole(role) {
+    this.data.activeRole = role;
+    this.save();
+  }
+
+  getRole() {
+    return this.data.activeRole || 'buyer';
+  }
+
+  // Click Tracking Engine
+  recordOutlinkClick(sellerId, offerId) {
+    const seller = this.getSeller(sellerId);
+    if (seller) {
+      seller.totalClicks = (seller.totalClicks || 0) + 1;
+    }
+
+    this.data.clickLogs.unshift({
+      id: 'clk-' + Date.now(),
+      sellerId,
+      offerId,
+      timestamp: new Date().toISOString().slice(0, 16).replace('T', ' '),
+      city: seller ? seller.city : 'unknown'
+    });
+
+    this.save();
+    console.log(`[Analytics] Tracked Outbound Click for Seller: ${seller ? seller.name : sellerId}`);
+  }
+
+  getProductGroups(filters = {}) {
+    let result = [...this.data.productGroups];
 
     if (filters.search) {
       const q = filters.search.toLowerCase();
-      result = result.filter(p => 
-        p.title.toLowerCase().includes(q) || 
-        p.location.toLowerCase().includes(q) ||
-        p.condition.toLowerCase().includes(q)
+      result = result.filter(g => 
+        g.title.toLowerCase().includes(q) ||
+        g.offers.some(o => o.location.toLowerCase().includes(q) || o.condition.toLowerCase().includes(q))
       );
     }
 
-    if (filters.city && filters.city !== 'all') {
-      result = result.filter(p => p.city === filters.city || p.city === 'all');
-    }
-
     if (filters.category && filters.category !== 'all') {
-      result = result.filter(p => p.category === filters.category);
+      result = result.filter(g => g.category === filters.category);
     }
 
-    if (filters.badge && filters.badge !== 'all') {
-      result = result.filter(p => {
-        const seller = this.getSeller(p.sellerId);
-        return seller && seller.badge === filters.badge;
-      });
-    }
-
-    // Sort logic
-    if (filters.sortBy === 'price_asc') {
-      result.sort((a, b) => a.price - b.price);
-    } else if (filters.sortBy === 'price_desc') {
-      result.sort((a, b) => b.price - a.price);
-    } else if (filters.sortBy === 'merit') {
-      result.sort((a, b) => {
-        const sellerA = this.getSeller(a.sellerId);
-        const sellerB = this.getSeller(b.sellerId);
-        const rankA = this.calculateMeritRank(sellerA, a);
-        const rankB = this.calculateMeritRank(sellerB, b);
-        return rankB - rankA;
-      });
-    } else { // default 'upvotes'
-      result.sort((a, b) => b.upvotes - a.upvotes);
+    if (filters.city && filters.city !== 'all') {
+      result = result.filter(g => 
+        g.offers.some(o => o.city === filters.city || o.city === 'all')
+      );
     }
 
     return result;
@@ -321,27 +286,20 @@ class DataStore {
     return this.data.reviews.filter(r => r.sellerId === sellerId);
   }
 
-  calculateMeritRank(seller, product) {
+  calculateMeritRank(seller, offer) {
     if (!seller) return 0;
-    let score = (product.upvotes * 2) + (seller.upvotes * 1.5) + (seller.rating * 10) + (seller.salesCount * 3);
+    let score = (seller.upvotes * 2) + (seller.rating * 10) + (seller.salesCount * 3) + (seller.totalClicks * 0.5);
     if (seller.badge === 'gold') score += 100;
     return Math.round(score);
   }
 
-  toggleUpvote(productId) {
-    const product = this.data.products.find(p => p.id === productId);
-    if (!product) return false;
-
-    const hasUpvoted = !!this.userUpvotes[productId];
+  toggleUpvote(offerId) {
+    const hasUpvoted = !!this.userUpvotes[offerId];
 
     if (hasUpvoted) {
-      product.upvotes -= 1;
-      delete this.userUpvotes[productId];
+      delete this.userUpvotes[offerId];
     } else {
-      product.upvotes += 1;
-      this.userUpvotes[productId] = true;
-      const seller = this.getSeller(product.sellerId);
-      if (seller) seller.upvotes += 1;
+      this.userUpvotes[offerId] = true;
     }
 
     this.save();
@@ -356,7 +314,6 @@ class DataStore {
       rating: parseFloat(rating),
       date: 'Just now',
       comment,
-      upvotes: 0,
       verifiedBuyer: true
     };
     this.data.reviews.unshift(newRev);
@@ -366,23 +323,20 @@ class DataStore {
       const sellerRevs = this.getReviews(sellerId);
       const avg = sellerRevs.reduce((acc, r) => acc + r.rating, 0) / sellerRevs.length;
       seller.rating = parseFloat(avg.toFixed(1));
-      seller.salesCount += 1;
     }
 
     this.save();
     return newRev;
   }
 
-  addProduct(productData) {
-    const newProd = {
-      id: 'prod-' + Date.now(),
-      upvotes: 1,
-      scrapedAt: 'Just now',
-      ...productData
-    };
-    this.data.products.unshift(newProd);
-    this.save();
-    return newProd;
+  verifySeller(sellerId, badgeType) {
+    const seller = this.getSeller(sellerId);
+    if (seller) {
+      seller.status = 'verified';
+      seller.badge = badgeType || 'blue';
+      seller.badgeTitle = badgeType === 'gold' ? 'Gold Merit Vendor' : 'ID Verified Vendor';
+      this.save();
+    }
   }
 }
 

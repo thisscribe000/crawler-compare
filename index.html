@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Crawler Compare - Price & Vendor Trust Engine</title>
-  <meta name="description" content="Compare product prices across Abuja, Lagos, Port Harcourt & Kano. Find verified sellers with community upvotes & merit rank badges.">
+  <title>Crawler Compare - Price Aggregator & Click Analytics Platform</title>
+  <meta name="description" content="Search product models to compare sellers across Jumia, Konga, Jiji, and Instagram with tracked out-links and seller analytics.">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -15,16 +15,20 @@
       <div class="logo-icon">C</div>
       <div class="logo-text">
         <h1>Crawler Compare</h1>
-        <p>Price & Vendor Trust Engine</p>
+        <p>Price Aggregator & Vendor Platform</p>
       </div>
     </div>
     
+    <!-- Multi-Role Switcher Tabs -->
+    <div class="role-switcher">
+      <button class="role-tab active" data-role="buyer">Buyer Mode</button>
+      <button class="role-tab" data-role="seller">Seller Dashboard</button>
+      <button class="role-tab" data-role="admin">Admin Console</button>
+    </div>
+
     <div class="nav-actions">
       <button class="btn btn-firecrawl" id="triggerScrapeBtn">
         Firecrawl Live Search
-      </button>
-      <button class="btn btn-primary" id="openAddModalBtn">
-        + List Item / Vendor
       </button>
     </div>
   </header>
@@ -32,122 +36,128 @@
   <!-- Main Content Container -->
   <main class="container">
     
-    <!-- Hero Section -->
-    <section class="hero">
-      <h2>Discover the <span>Best Prices</span> & <span>Verified Sellers</span> in Nigeria</h2>
-      <p>Compare prices across Jumia, Konga, Computer Village (Ikeja), Banex Plaza (Abuja), and verified local vendors ranked by community upvotes.</p>
+    <!-- ==================== 1. BUYER MODE VIEW ==================== -->
+    <section id="buyerView">
+      <!-- Hero Section -->
+      <section class="hero">
+        <h2>Compare Prices for Any Product Across All Vendors</h2>
+        <p>Search a product to view verified listings from Jumia, Konga, Computer Village, Banex Plaza, and Instagram vendors with tracked direct links.</p>
+      </section>
+
+      <!-- Search & Filters Container -->
+      <section class="search-box-container">
+        <div class="search-input-wrap">
+          <input type="text" id="searchInput" placeholder="Search product model (e.g. iPhone 15 Pro Max, MacBook Pro M3, Solar Inverter)...">
+        </div>
+        
+        <select class="filter-select" id="citySelect">
+          <option value="all">Location: All Nigeria</option>
+          <option value="abuja">Abuja (Wuse, Banex, Maitama)</option>
+          <option value="lagos">Lagos (Ikeja, Lekki, Yaba)</option>
+          <option value="ph">Port Harcourt (Garrison, GRA)</option>
+          <option value="kano">Kano (Farm Centre)</option>
+        </select>
+
+        <select class="filter-select" id="categorySelect">
+          <option value="all">All Categories</option>
+          <option value="phones">Phones & Tablets</option>
+          <option value="laptops">Laptops & Computers</option>
+          <option value="power">Generators & Solar</option>
+          <option value="gaming">Gaming Consoles</option>
+        </select>
+      </section>
+
+      <!-- Live Scrape Notice Banner -->
+      <div id="liveScrapeBanner" style="display:none; background: #fff7ed; border: 1px solid #fdba74; padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 24px; text-align: center; color: #c2410c; font-size: 13px; font-weight: 600;">
+        Firecrawl Engine Active: Executing live market scrape and pulling latest verified listings...
+      </div>
+
+      <!-- Grouped Products List -->
+      <section class="grouped-products-container" id="groupedProductsContainer">
+        <!-- Dynamically populated product model cards with seller offer breakdowns -->
+      </section>
     </section>
 
-    <!-- Search & Filters Container -->
-    <section class="search-box-container">
-      <div class="search-input-wrap">
-        <input type="text" id="searchInput" placeholder="Search products (e.g. iPhone 15 Pro Max, MacBook M3, Solar Inverter)...">
+    <!-- ==================== 2. SELLER DASHBOARD VIEW ==================== -->
+    <section id="sellerView" style="display: none;">
+      <div class="dashboard-header">
+        <h2>Seller Analytics & Inventory Dashboard</h2>
+        <p>Track your outbound buyer clicks, conversion metrics, and manage listed products.</p>
       </div>
-      
-      <select class="filter-select" id="citySelect">
-        <option value="all">Location: All Nigeria</option>
-        <option value="abuja">Abuja (Wuse, Banex, Maitama)</option>
-        <option value="lagos">Lagos (Ikeja, Lekki, Yaba)</option>
-        <option value="ph">Port Harcourt (Garrison, GRA)</option>
-        <option value="kano">Kano (Farm Centre)</option>
-        <option value="ibadan">Ibadan (Dugbe)</option>
-      </select>
 
-      <select class="filter-select" id="categorySelect">
-        <option value="all">All Categories</option>
-        <option value="phones">Phones & Tablets</option>
-        <option value="laptops">Laptops & Computers</option>
-        <option value="power">Generators & Solar</option>
-        <option value="gaming">Gaming Consoles</option>
-      </select>
+      <!-- Analytics Cards Row -->
+      <div class="analytics-grid">
+        <div class="stat-card">
+          <div class="stat-title">Outbound Buyer Clicks</div>
+          <div class="stat-value" id="sellerTotalClicks">428</div>
+          <div class="stat-desc">+18% from last week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Store Upvotes Received</div>
+          <div class="stat-value" id="sellerUpvotes">184</div>
+          <div class="stat-desc">Community Merit Rank</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Completed Verified Deals</div>
+          <div class="stat-value" id="sellerDeals">142</div>
+          <div class="stat-desc">Customer Reviews: 4.9/5</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Verification Tier</div>
+          <div class="stat-value" style="color: #d97706; font-size: 20px;" id="sellerBadgeTitle">Gold Merit Vendor</div>
+          <div class="stat-desc">Earned Rank Badge</div>
+        </div>
+      </div>
 
-      <select class="filter-select" id="sortSelect">
-        <option value="upvotes">Sort: Most Upvoted</option>
-        <option value="merit">Sort: Merit Rank Score</option>
-        <option value="price_asc">Sort: Price (Lowest First)</option>
-        <option value="price_desc">Sort: Price (Highest First)</option>
-      </select>
+      <!-- Out-link Click Activity Log Table -->
+      <div class="dashboard-section">
+        <h3>Recent Buyer Click Activity (Tracked Links)</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Product Model</th>
+              <th>Buyer Location</th>
+              <th>Outbound Destination</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="clickLogsTableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
     </section>
 
-    <!-- Badge Hierarchy Legend & Filter -->
-    <section class="badge-legend-bar">
-      <div style="font-size: 13px; font-weight: 600; color: var(--text-muted);">
-        Filter by Vendor Trust Tier:
+    <!-- ==================== 3. ADMIN CONSOLE VIEW ==================== -->
+    <section id="adminView" style="display: none;">
+      <div class="dashboard-header">
+        <h2>System Admin Console</h2>
+        <p>Manage vendor verification requests, role privileges, and crawler job status.</p>
       </div>
-      <div class="badge-tags">
-        <div class="badge-pill active" data-badge="all">All Sellers</div>
-        <div class="badge-pill gold" data-badge="gold">Gold Merit (Earned Trust)</div>
-        <div class="badge-pill blue" data-badge="blue">ID Verified</div>
-        <div class="badge-pill store" data-badge="store">Official Store</div>
+
+      <div class="dashboard-section">
+        <h3>Pending Vendor Verification Queue</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Vendor Name</th>
+              <th>City Location</th>
+              <th>Current Tier</th>
+              <th>Total Clicks</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="adminQueueTableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
       </div>
-    </section>
-
-    <!-- Live Scrape Notice Banner (Hidden by default) -->
-    <div id="liveScrapeBanner" style="display:none; background: #fff7ed; border: 1px solid #fdba74; padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 24px; text-align: center; color: #c2410c; font-size: 13px; font-weight: 600;">
-      Firecrawl Engine Active: Executing live market scrape and pulling latest verified listings...
-    </div>
-
-    <!-- Products List (Product Hunt Style) -->
-    <section class="products-grid" id="productsGrid">
-      <!-- Product items dynamically populated by app.js -->
     </section>
 
   </main>
 
-  <!-- Vendor / Product Addition Modal -->
-  <div class="modal-overlay" id="addModal">
-    <div class="modal-box">
-      <button class="modal-close" id="closeAddModal">&times;</button>
-      <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 4px; color: var(--text-dark);">List Inventory or Add Vendor</h3>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Publish your product to gain community upvotes and direct WhatsApp buyers.</p>
-      
-      <form id="addProductForm">
-        <div class="form-group">
-          <label>Product Title</label>
-          <input type="text" class="form-control" id="formTitle" placeholder="e.g. Samsung S24 Ultra 512GB (Abuja Shop)" required>
-        </div>
-
-        <div class="form-group" style="display: flex; gap: 10px;">
-          <div style="flex: 1;">
-            <label>Price (NGN)</label>
-            <input type="number" class="form-control" id="formPrice" placeholder="1500000" required>
-          </div>
-          <div style="flex: 1;">
-            <label>City</label>
-            <select class="form-control" id="formCity">
-              <option value="abuja">Abuja (FCT)</option>
-              <option value="lagos">Lagos State</option>
-              <option value="ph">Port Harcourt</option>
-              <option value="kano">Kano</option>
-              <option value="ibadan">Ibadan</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Specific Location / Address</label>
-          <input type="text" class="form-control" id="formLocation" placeholder="e.g. Suite 12, Banex Plaza, Wuse 2" required>
-        </div>
-
-        <div class="form-group" style="display: flex; gap: 10px;">
-          <div style="flex: 1;">
-            <label>Seller / IG Handle</label>
-            <input type="text" class="form-control" id="formSellerName" placeholder="@abujagadgets" required>
-          </div>
-          <div style="flex: 1;">
-            <label>WhatsApp Number</label>
-            <input type="text" class="form-control" id="formWhatsApp" placeholder="2348012345678" required>
-          </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px; padding: 12px;">
-          Publish Listing
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Seller Reviews & Community Upvotes Modal -->
+  <!-- Seller Reviews Modal -->
   <div class="modal-overlay" id="reviewsModal">
     <div class="modal-box">
       <button class="modal-close" id="closeReviewsModal">&times;</button>
