@@ -1,4 +1,4 @@
-/* Crawler Compare - Product Hunt Minimalist Theme with Real Auth & Onboarding */
+/* Crawler Compare - Product Hunt Minimalist Theme with Clickable Logo */
 
 :root {
   --bg-page: #f8fafc;
@@ -68,6 +68,12 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.logo-container:hover .logo-text h1 {
+  color: var(--primary);
 }
 
 .logo-icon {
@@ -90,6 +96,7 @@ body {
   color: var(--text-dark);
   letter-spacing: -0.3px;
   line-height: 1.2;
+  transition: color 0.15s ease;
 }
 
 .logo-text p {

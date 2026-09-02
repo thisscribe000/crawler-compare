@@ -1,7 +1,8 @@
-// Crawler Compare - Production Engine with Authentic Registration & Inventory Management
+// Crawler Compare - Main Application Logic (Production Engine with Clickable Logo Navigation)
 
 document.addEventListener('DOMContentLoaded', () => {
   // DOM Elements
+  const logoBtn = document.getElementById('logoBtn');
   const buyerView = document.getElementById('buyerView');
   const sellerView = document.getElementById('sellerView');
   const adminView = document.getElementById('adminView');
@@ -41,6 +42,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Load any live scraped data on boot
   loadScrapedDataFile();
+
+  // Clickable Logo Event Listener (Returns to Home Page)
+  logoBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    searchInput.value = '';
+    citySelect.value = 'all';
+    categorySelect.value = 'all';
+    
+    // Switch to public buyer search view
+    buyerView.style.display = 'block';
+    sellerView.style.display = 'none';
+    adminView.style.display = 'none';
+    
+    renderGroupedProducts();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 
   // Active View Controller
   function renderActiveView() {
@@ -123,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     } catch (e) {
-      // no-op if file not requested
+      // no-op
     }
   }
 
