@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crawler Compare 🇳🇬 - Nigerian Product Price & Vendor Trust Engine</title>
+  <meta name="description" content="Compare product prices across Abuja, Lagos, Port Harcourt & Kano. Find verified Instagram, Jiji, and physical shop vendors with community upvotes & X-style badges.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="logo-container">
+      <div class="logo-icon">C</div>
+      <div class="logo-text">
+        <h1>Crawler Compare</h1>
+        <p>Nigeria Price & Vendor Trust Engine</p>
+      </div>
+    </div>
+    
+    <div class="nav-actions">
+      <button class="btn btn-firecrawl" id="triggerScrapeBtn">
+        <span>🔥</span> Firecrawl Live Search
+      </button>
+      <button class="btn btn-primary" id="openAddModalBtn">
+        + List Item / Vendor
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="container">
+    
+    <!-- Hero Section -->
+    <section class="hero">
+      <h2>Find the <span>Best Prices</span> & <span>Trusted Sellers</span> in Your City</h2>
+      <p>Aggregating live prices from Jumia, Konga, Computer Village, Banex Plaza, and verified Instagram sellers across Nigeria.</p>
+    </section>
+
+    <!-- Search & Filters Container -->
+    <section class="search-box-container">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search product (e.g., iPhone 15 Pro Max, MacBook M3, Inverter, PS5)...">
+      </div>
+      
+      <select class="filter-select" id="citySelect">
+        <option value="all">📍 All Nigeria 🇳🇬</option>
+        <option value="abuja">📍 Abuja (Wuse, Banex, Maitama)</option>
+        <option value="lagos">📍 Lagos (Ikeja, Lekki, Yaba)</option>
+        <option value="ph">📍 Port Harcourt (Garrison, GRA)</option>
+        <option value="kano">📍 Kano (Farm Centre)</option>
+        <option value="ibadan">📍 Ibadan (Dugbe)</option>
+      </select>
+
+      <select class="filter-select" id="categorySelect">
+        <option value="all">📦 All Categories</option>
+        <option value="phones">📱 Phones & Tablets</option>
+        <option value="laptops">💻 Laptops & Computers</option>
+        <option value="power">⚡ Generators & Solar</option>
+        <option value="gaming">🎮 Gaming Consoles</option>
+      </select>
+
+      <select class="filter-select" id="sortSelect">
+        <option value="upvotes">🔥 Sort: Most Upvoted</option>
+        <option value="merit">🏆 Sort: Merit Rank Score</option>
+        <option value="price_asc">💰 Sort: Price (Lowest First)</option>
+        <option value="price_desc">💎 Sort: Price (Highest First)</option>
+      </select>
+    </section>
+
+    <!-- Badge Hierarchy Legend & Filter -->
+    <section class="badge-legend-bar">
+      <div style="font-size: 13px; font-weight: 600; color: var(--text-muted);">
+        Filter by Vendor Trust Tier:
+      </div>
+      <div class="badge-tags">
+        <div class="badge-pill active" data-badge="all">All Sellers</div>
+        <div class="badge-pill gold" data-badge="gold">🏆 Gold Merit (Earned Trust)</div>
+        <div class="badge-pill blue" data-badge="blue">🔵 Blue Check (ID Verified)</div>
+        <div class="badge-pill store" data-badge="store">🏢 Official Store (Retail Chain)</div>
+      </div>
+    </section>
+
+    <!-- Live Scrape Notice Banner (Hidden by default) -->
+    <div id="liveScrapeBanner" style="display:none; background: rgba(99, 102, 241, 0.15); border: 1px solid var(--primary); padding: 14px 20px; border-radius: var(--radius-md); margin-bottom: 24px; text-align: center; color: var(--primary);">
+      🔥 <strong>Firecrawl Engine Active:</strong> Fetching real-time market deals and parsing latest social/store listings...
+    </div>
+
+    <!-- Products Grid -->
+    <section class="products-grid" id="productsGrid">
+      <!-- Product cards dynamically populated by app.js -->
+    </section>
+
+  </main>
+
+  <!-- Vendor / Product Addition Modal -->
+  <div class="modal-overlay" id="addModal">
+    <div class="modal-box">
+      <button class="modal-close" id="closeAddModal">&times;</button>
+      <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 6px;">Add Product or List Vendor</h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">List your inventory to gain upvotes and direct WhatsApp buyers in your city.</p>
+      
+      <form id="addProductForm">
+        <div class="form-group">
+          <label>Product Title</label>
+          <input type="text" class="form-control" id="formTitle" placeholder="e.g. Samsung S24 Ultra 512GB (Abuja Shop)" required>
+        </div>
+
+        <div class="form-group" style="display: flex; gap: 12px;">
+          <div style="flex: 1;">
+            <label>Price (NGN ₦)</label>
+            <input type="number" class="form-control" id="formPrice" placeholder="1500000" required>
+          </div>
+          <div style="flex: 1;">
+            <label>City</label>
+            <select class="form-control" id="formCity">
+              <option value="abuja">Abuja (FCT)</option>
+              <option value="lagos">Lagos State</option>
+              <option value="ph">Port Harcourt</option>
+              <option value="kano">Kano</option>
+              <option value="ibadan">Ibadan</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Specific Location / Address</label>
+          <input type="text" class="form-control" id="formLocation" placeholder="e.g. Suite 12, Banex Plaza, Wuse 2" required>
+        </div>
+
+        <div class="form-group" style="display: flex; gap: 12px;">
+          <div style="flex: 1;">
+            <label>Seller / IG Handle</label>
+            <input type="text" class="form-control" id="formSellerName" placeholder="@abujagadgets" required>
+          </div>
+          <div style="flex: 1;">
+            <label>WhatsApp Number</label>
+            <input type="text" class="form-control" id="formWhatsApp" placeholder="2348012345678" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px; padding: 14px;">
+          🚀 Publish Listing
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Seller Reviews & Community Upvotes Modal -->
+  <div class="modal-overlay" id="reviewsModal">
+    <div class="modal-box">
+      <button class="modal-close" id="closeReviewsModal">&times;</button>
+      <div id="reviewsModalContent">
+        <!-- Dynamically populated seller details and reviews list -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="mock-data.js"></script>
+  <script src="firecrawl-service.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
